@@ -1,0 +1,2302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Neon Bunny: Ultimate Deluxe Runner</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      user-select: none;
+      -webkit-user-select: none;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background-color: #080c14;
+      color: #f3f4f6;
+      overflow: hidden;
+      touch-action: manipulation;
+    }
+    .font-fredoka {
+      font-family: 'Fredoka One', cursive;
+    }
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 8px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #38bdf8;
+      border-radius: 8px;
+    }
+    /* Glow Utilities */
+    .glow-cyan {
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.5), inset 0 0 10px rgba(56, 189, 248, 0.2);
+    }
+    .glow-amber {
+      box-shadow: 0 0 15px rgba(251, 191, 36, 0.5);
+    }
+    .glow-rose {
+      box-shadow: 0 0 20px rgba(244, 63, 94, 0.7);
+    }
+    .text-glow-cyan {
+      text-shadow: 0 0 10px rgba(56, 189, 248, 0.8);
+    }
+    .text-glow-rose {
+      text-shadow: 0 0 12px rgba(244, 63, 94, 0.9);
+    }
+    .card-item {
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .card-item:hover {
+      transform: translateY(-3px) scale(1.04);
+    }
+    .card-item:active {
+      transform: translateY(0) scale(0.95);
+    }
+    /* Screen Shake Animation Class */
+    .shake {
+      animation: shake 0.35s cubic-bezier(.36,.07,.19,.97) both;
+    }
+    @keyframes shake {
+      10%, 90% { transform: translate3d(-3px, 0, 0); }
+      20%, 80% { transform: translate3d(5px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-7px, 0, 0); }
+      40%, 60% { transform: translate3d(7px, 0, 0); }
+    }
+  </style>
+</head>
+<body class="h-screen w-screen flex flex-col justify-between items-center p-2 sm:p-3 bg-slate-950 text-white relative overflow-hidden">
+
+  <!-- Background Ambient Glows -->
+  <div class="absolute -top-32 -left-32 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-fuchsia-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+  <!-- Top Header / HUD -->
+  <header class="w-full max-w-5xl flex flex-col gap-1 z-10 bg-slate-900/90 backdrop-blur-md px-3 sm:px-5 py-2 rounded-2xl border border-slate-800 shadow-2xl mb-1">
+    <div class="flex items-center justify-between">
+      <!-- Stats Left -->
+      <div class="flex items-center space-x-2 sm:space-x-5">
+        <div class="flex items-center space-x-1" title="Health Points">
+          <span class="text-lg sm:text-xl">❤️</span>
+          <span id="hp-display" class="font-fredoka text-lg sm:text-xl text-rose-400">3/3</span>
+        </div>
+        <div class="flex items-center space-x-1" title="Carrots (Currency)">
+          <span class="text-lg sm:text-xl">🥕</span>
+          <span id="gems-display" class="font-fredoka text-lg sm:text-xl text-amber-400">0</span>
+        </div>
+        <div class="flex items-center space-x-1">
+          <span class="text-slate-400 text-[10px] sm:text-xs uppercase tracking-wider font-bold">Lvl</span>
+          <span id="level-display" class="font-fredoka text-base sm:text-lg text-cyan-400">1</span>
+        </div>
+        <!-- Shield Indicator -->
+        <div id="shield-indicator" class="hidden items-center space-x-1 bg-cyan-950 border border-cyan-500/50 px-2 py-0.5 rounded-lg">
+          <span class="text-xs">🛡️</span>
+          <span class="text-[10px] text-cyan-300 font-bold uppercase">Active</span>
+        </div>
+      </div>
+
+      <!-- Title / Highscore -->
+      <div class="text-center hidden md:block">
+        <h1 class="font-fredoka text-lg sm:text-xl text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-fuchsia-400 text-glow-cyan tracking-wide">
+          NEON BUNNY: ULTIMATE DELUXE
+        </h1>
+        <p class="text-[10px] text-slate-400 font-bold">Best Level: <span id="high-score-display" class="text-amber-300">1</span></p>
+      </div>
+
+      <!-- Actions Right -->
+      <div class="flex items-center space-x-1.5 sm:space-x-3">
+        <div class="flex items-center space-x-1 bg-slate-800/80 px-2.5 py-1 rounded-xl border border-slate-700">
+          <span class="text-[10px] text-slate-400 font-bold uppercase">Turn</span>
+          <span id="turn-display" class="font-fredoka text-cyan-300 text-sm sm:text-base">1</span>
+        </div>
+        <button id="shop-btn" class="px-2.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold transition flex items-center space-x-1">
+          <span>🛒</span>
+          <span class="hidden sm:inline">Shop</span>
+        </button>
+        <button id="sound-btn" class="p-1.5 sm:p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition border border-slate-700">
+          🔊
+        </button>
+        <button id="restart-btn" class="p-1.5 sm:p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition border border-slate-700" title="Restart Game">
+          🔄
+        </button>
+      </div>
+    </div>
+
+    <!-- BOSS HEALTH BAR OVERLAY (Hidden by default) -->
+    <div id="boss-hud" class="hidden w-full flex-col bg-rose-950/60 border border-rose-500/50 rounded-xl p-2 mt-1">
+      <div class="flex justify-between items-center mb-1 px-1">
+        <span id="boss-name-text" class="font-fredoka text-xs sm:text-sm text-rose-300 flex items-center space-x-1.5 text-glow-rose">
+          <span>👑</span>
+          <span>THE SHADOW KING</span>
+        </span>
+        <span id="boss-hp-text" class="font-fredoka text-xs text-rose-400">HP: 3/3</span>
+      </div>
+      <div class="w-full bg-slate-950 rounded-full h-2.5 overflow-hidden border border-rose-500/30">
+        <div id="boss-hp-bar" class="bg-gradient-to-r from-rose-600 via-red-500 to-amber-500 h-full transition-all duration-300" style="width: 100%;"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Central Play Area: Maze Canvas + Side Power-Up Panel -->
+  <div id="game-layout" class="w-full max-w-5xl flex-1 flex flex-row items-center justify-center gap-3 min-h-0 my-1">
+    
+    <!-- Game Canvas Container -->
+    <main id="canvas-wrapper" class="relative flex-1 h-full flex items-center justify-center min-w-0">
+      <canvas id="gameCanvas" class="rounded-2xl border-2 border-cyan-500/30 shadow-2xl bg-slate-900/90 max-w-full max-h-full object-contain cursor-pointer"></canvas>
+      
+      <!-- Status Overlay Banner -->
+      <div id="instruction-tip" class="absolute top-3 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur-md px-4 py-1.5 rounded-full border border-cyan-500/40 text-xs font-semibold text-cyan-200 shadow-lg pointer-events-none transition-all duration-300 flex items-center space-x-2">
+        <span id="tip-icon">💡</span>
+        <span id="tip-text">Select cards to queue moves, then press RUN!</span>
+      </div>
+    </main>
+
+    <!-- Side Power-Up Panel -->
+    <aside class="w-40 sm:w-48 bg-slate-900/90 backdrop-blur-md border border-amber-500/40 rounded-2xl p-2.5 flex flex-col shrink-0 h-full max-h-[560px] shadow-xl">
+      <div class="text-center pb-2 mb-2 border-b border-amber-500/30">
+        <h2 class="font-fredoka text-xs sm:text-sm text-amber-400 tracking-wide">⚡ POWER-UPS</h2>
+        <p class="text-[9px] text-slate-400">Click or hover for info</p>
+      </div>
+      <div id="powerup-deck-container" class="flex-1 overflow-y-auto space-y-2 pr-0.5 mb-2">
+        <!-- Rendered via JS -->
+      </div>
+      <!-- Blue Description Box at Bottom of Panel -->
+      <div id="powerup-desc-box" class="bg-blue-950/80 border border-blue-500/60 rounded-xl p-2 text-[10px] text-blue-200 font-medium leading-snug shadow-inner min-h-[48px] flex items-center justify-center text-center">
+        Hover or select a power-up card to view its description here.
+      </div>
+    </aside>
+  </div>
+
+  <!-- Bottom Control Deck & Sequence Bar -->
+  <footer class="w-full max-w-5xl z-10 flex flex-col gap-1.5">
+    
+    <!-- Movement Queue Preview Bar -->
+    <div class="w-full bg-slate-900/90 backdrop-blur-md p-2 rounded-xl border border-slate-800 flex items-center justify-between min-h-[52px]">
+      <div class="flex items-center space-x-1.5 overflow-x-auto py-1 px-1 flex-1" id="queue-container">
+        <span id="queue-empty-text" class="text-xs text-slate-500 italic pl-2">Planned cards appear here...</span>
+      </div>
+      
+      <!-- Control Buttons -->
+      <div class="flex items-center space-x-1.5 pl-2 border-l border-slate-800 shrink-0">
+        <button id="undo-btn" class="px-2.5 py-2 bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold text-xs rounded-xl transition border border-amber-500/30 disabled:opacity-30 disabled:pointer-events-none" title="Undo last step">
+          ↩️
+        </button>
+        <button id="clear-btn" class="px-2.5 py-2 bg-slate-800 hover:bg-slate-700 text-rose-400 font-bold text-xs rounded-xl transition border border-rose-500/30 disabled:opacity-30 disabled:pointer-events-none">
+          Clear
+        </button>
+        <button id="reroll-btn" class="px-3 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-extrabold text-xs rounded-xl shadow-md transition transform active:scale-95 flex items-center space-x-1 disabled:opacity-40 disabled:pointer-events-none">
+          <span>🎲</span>
+          <span id="reroll-text">Reroll (1)</span>
+        </button>
+        <button id="execute-btn" class="px-4 sm:px-6 py-2 bg-gradient-to-r from-cyan-400 to-emerald-400 hover:from-cyan-300 hover:to-emerald-300 text-slate-950 font-fredoka text-xs sm:text-sm uppercase tracking-wider rounded-xl shadow-lg glow-cyan transition transform active:scale-95 disabled:opacity-30 disabled:pointer-events-none">
+          RUN! 🚀
+        </button>
+      </div>
+    </div>
+
+    <!-- Movement Hand Deck Row -->
+    <div class="flex flex-col gap-1 w-full">
+      <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider px-1 flex justify-between">
+        <span>Movement Hand</span>
+      </div>
+      <div class="grid grid-cols-8 gap-1.5 sm:gap-2 w-full" id="deck-container">
+        <!-- Generated via JS -->
+      </div>
+    </div>
+  </footer>
+
+  <!-- SHOP MODAL -->
+  <div id="shop-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border-2 border-amber-500/50 p-5 sm:p-6 rounded-3xl max-w-lg w-full shadow-2xl relative max-h-[90vh] flex flex-col">
+      <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-800">
+        <h2 class="font-fredoka text-xl text-amber-400 flex items-center space-x-2">
+          <span>🛒 CARROT SHOP & SKINS</span>
+        </h2>
+        <button id="close-shop-btn" class="text-slate-400 hover:text-white font-bold text-lg p-1">✕</button>
+      </div>
+
+      <div class="overflow-y-auto space-y-4 pr-1 flex-1">
+        <div>
+          <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Power Upgrades</h3>
+          <div class="space-y-2">
+            <div class="bg-slate-800/80 p-3 rounded-2xl border border-slate-700 flex justify-between items-center">
+              <div>
+                <p class="font-bold text-sm text-cyan-200">Extra Heart (+1 Max HP)</p>
+                <p class="text-[11px] text-slate-400">Increase maximum health pool</p>
+              </div>
+              <button id="buy-hp-btn" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl shadow transition shrink-0">
+                🥕 <span id="cost-hp">30</span>
+              </button>
+            </div>
+            <div class="bg-slate-800/80 p-3 rounded-2xl border border-slate-700 flex justify-between items-center">
+              <div>
+                <p class="font-bold text-sm text-cyan-200">Extra Rerolls (+2)</p>
+                <p class="text-[11px] text-slate-400">Add 2 deck rerolls immediately</p>
+              </div>
+              <button id="buy-reroll-btn" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl shadow transition shrink-0">
+                🥕 <span id="cost-reroll">15</span>
+              </button>
+            </div>
+            <div class="bg-slate-800/80 p-3 rounded-2xl border border-slate-700 flex justify-between items-center">
+              <div>
+                <p class="font-bold text-sm text-cyan-200">Energy Shield</p>
+                <p class="text-[11px] text-slate-400">Equip protective shield for next damage</p>
+              </div>
+              <button id="buy-shield-btn" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl shadow transition shrink-0">
+                🥕 <span id="cost-shield">20</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Skin Categories Selector & Grid -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Animal Skins (30 Styles)</h3>
+            <div id="skin-tabs" class="flex space-x-1 bg-slate-800 p-1 rounded-xl border border-slate-700">
+              <button data-cat="bunny" class="skin-tab-btn px-2.5 py-1 text-[10px] font-bold rounded-lg bg-cyan-500 text-slate-950 transition">🐰 Bunnies</button>
+              <button data-cat="cat_friends" class="skin-tab-btn px-2.5 py-1 text-[10px] font-bold rounded-lg text-slate-300 hover:text-white transition">🐱 Friends</button>
+              <button data-cat="wild" class="skin-tab-btn px-2.5 py-1 text-[10px] font-bold rounded-lg text-slate-300 hover:text-white transition">🐻 Forest</button>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2" id="skins-grid">
+            <!-- Dynamically Rendered -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAMEOVER / VICTORY MODAL -->
+  <div id="modal-overlay" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border-2 border-cyan-500/50 p-6 sm:p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl relative overflow-hidden">
+      <div id="modal-content">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Logic Script -->
+  <script>
+    /* =========================================================================
+       1. GAME CONSTANTS, CONFIG & STATE
+       ========================================================================= */
+    const CANVAS = document.getElementById('gameCanvas');
+    const CTR = CANVAS.getContext('2d');
+
+    let GRID_SIZE = 9;
+    let TILE_SIZE = 64;
+
+    let maxHp = 3;
+    let hp = 3;
+    let gems = 0;
+    let level = 1;
+    let turnCount = 1;
+    let rerolls = 1;
+    let hasShield = false;
+    let freezeTurns = 0;
+    let mirrorClone = null;
+    let plasmaTurns = 0;
+    let keyCollected = false;
+    let isExecuting = false;
+    let soundEnabled = true;
+
+    let isBossLevel = false;
+    let boss = null; 
+
+    let highScore = parseInt(localStorage.getItem('neon_bunny_highscore_ultimate') || '1');
+    document.getElementById('high-score-display').innerText = highScore;
+
+    // 30 Total Free Skins organized into 3 Categories with 10 Styles each[cite: 9]
+    const SKINS = [
+      // CATEGORY 1: BUNNIES (10 Styles)[cite: 9]
+      { id: 'cyan', name: 'Neon Cyan Bunny', category: 'bunny', type: 'bunny', color: '#00e5ff', earInner: '#a5f3fc', blush: '#38bdf8', unlocked: true },
+      { id: 'pink', name: 'Cyber Pink Bunny', category: 'bunny', type: 'bunny', color: '#ec4899', earInner: '#fbcfe8', blush: '#f43f5e', unlocked: true },
+      { id: 'gold', name: 'Golden Bunny', category: 'bunny', type: 'bunny', color: '#f59e0b', earInner: '#fef08a', blush: '#fbbf24', unlocked: true },
+      { id: 'matrix', name: 'Matrix Emerald', category: 'bunny', type: 'bunny', color: '#10b981', earInner: '#a7f3d0', blush: '#34d399', unlocked: true },
+      { id: 'sakura', name: 'Sakura Blossom', category: 'bunny', type: 'bunny', color: '#fda4af', earInner: '#ffe4e6', blush: '#fb7185', unlocked: true },
+      { id: 'lavender', name: 'Lavender Dream', category: 'bunny', type: 'bunny', color: '#c084fc', earInner: '#f3e8ff', blush: '#a855f7', unlocked: true },
+      { id: 'mint', name: 'Frosty Mint', category: 'bunny', type: 'bunny', color: '#2dd4bf', earInner: '#ccfbf1', blush: '#14b8a6', unlocked: true },
+      { id: 'sunset', name: 'Sunset Orange', category: 'bunny', type: 'bunny', color: '#fb923c', earInner: '#ffedd5', blush: '#f97316', unlocked: true },
+      { id: 'ruby', name: 'Ruby Heart', category: 'bunny', type: 'bunny', color: '#e11d48', earInner: '#ffe4e6', blush: '#be123c', unlocked: true },
+      { id: 'galaxy', name: 'Cosmic Galaxy', category: 'bunny', type: 'bunny', color: '#6366f1', earInner: '#e0e7ff', blush: '#4f46e5', unlocked: true },
+
+      // CATEGORY 2: CAT & FRIENDS (10 Styles)[cite: 9]
+      { id: 'cat_kitty', name: 'Neon Kitty', category: 'cat_friends', type: 'cat', color: '#fb7185', earInner: '#fbcfe8', blush: '#f43f5e', unlocked: true },
+      { id: 'dog_puppy', name: 'Sparkle Puppy', category: 'cat_friends', type: 'dog', color: '#a16207', earInner: '#fef08a', blush: '#ca8a04', unlocked: true },
+      { id: 'hamster_cheek', name: 'Chubby Hamster', category: 'cat_friends', type: 'hamster', color: '#fb923c', earInner: '#ffedd5', blush: '#f97316', unlocked: true },
+      { id: 'duck_quack', name: 'Sunny Duck', category: 'cat_friends', type: 'duck', color: '#facc15', earInner: '#fef9c3', blush: '#eab308', unlocked: true },
+      { id: 'penguin_ice', name: 'Frosty Penguin', category: 'cat_friends', type: 'penguin', color: '#0284c7', earInner: '#e0f2fe', blush: '#0284c7', unlocked: true },
+      { id: 'fox_kitsune', name: 'Neon Fox', category: 'cat_friends', type: 'fox', color: '#f97316', earInner: '#fed7aa', blush: '#ea580c', unlocked: true },
+      { id: 'cat_cyber', name: 'Cyber Neko', category: 'cat_friends', type: 'cat', color: '#38bdf8', earInner: '#e0f2fe', blush: '#0284c7', unlocked: true },
+      { id: 'dog_cyber', name: 'Cyber Hound', category: 'cat_friends', type: 'dog', color: '#94a3b8', earInner: '#f1f5f9', blush: '#64748b', unlocked: true },
+      { id: 'owl_wise', name: 'Neon Owl', category: 'cat_friends', type: 'owl', color: '#8b5cf6', earInner: '#ede9fe', blush: '#7c3aed', unlocked: true },
+      { id: 'mouse_squeak', name: 'Pico Mouse', category: 'cat_friends', type: 'mouse', color: '#cbd5e1', earInner: '#f8fafc', blush: '#94a3b8', unlocked: true },
+
+      // CATEGORY 3: WILD & FOREST (10 Styles)[cite: 9]
+      { id: 'bear_teddy', name: 'Honey Bear', category: 'wild', type: 'bear', color: '#d97706', earInner: '#fde68a', blush: '#b45309', unlocked: true },
+      { id: 'panda_bamboo', name: 'Cyber Panda', category: 'wild', type: 'panda', color: '#334155', earInner: '#cbd5e1', blush: '#64748b', unlocked: true },
+      { id: 'koala_eucaly', name: 'Dreamy Koala', category: 'wild', type: 'koala', color: '#64748b', earInner: '#cbd5e1', blush: '#475569', unlocked: true },
+      { id: 'frog_lily', name: 'Neon Frog', category: 'wild', type: 'frog', color: '#22c55e', earInner: '#bbf7d0', blush: '#16a34a', unlocked: true },
+      { id: 'tiger_stripe', name: 'Neon Tiger', category: 'wild', type: 'tiger', color: '#f97316', earInner: '#ffedd5', blush: '#c2410c', unlocked: true },
+      { id: 'lion_mane', name: 'Solar Lion', category: 'wild', type: 'lion', color: '#eab308', earInner: '#fef08a', blush: '#ca8a04', unlocked: true },
+      { id: 'wolf_shadow', name: 'Shadow Wolf', category: 'wild', type: 'wolf', color: '#475569', earInner: '#94a3b8', blush: '#334155', unlocked: true },
+      { id: 'raccoon_bandit', name: 'Masked Raccoon', category: 'wild', type: 'raccoon', color: '#64748b', earInner: '#cbd5e1', blush: '#475569', unlocked: true },
+      { id: 'hedgehog_spike', name: 'Neon Hedgehog', category: 'wild', type: 'hedgehog', color: '#a16207', earInner: '#fef08a', blush: '#854d0e', unlocked: true },
+      { id: 'squirrel_nut', name: 'Cyber Squirrel', category: 'wild', type: 'squirrel', color: '#d97706', earInner: '#ffedd5', blush: '#b45309', unlocked: true }
+    ];
+    let activeSkin = SKINS[0];
+    let activeSkinCategory = 'bunny';
+
+    // 20 Unique Boss Data Catalog[cite: 9]
+    const BOSS_CATALOG = [
+      { name: "The Shadow King", color: "#881337", accent: "#f43f5e" },
+      { name: "Inferno Baron", color: "#7c2d12", accent: "#f97316" },
+      { name: "Frostbite Titan", color: "#1e3a8a", accent: "#38bdf8" },
+      { name: "Toxic Overlord", color: "#065f46", accent: "#34d399" },
+      { name: "Voltage Empress", color: "#581c87", accent: "#c084fc" },
+      { name: "Cyber Demon", color: "#831843", accent: "#ec4899" },
+      { name: "Golden Monarch", color: "#78350f", accent: "#fbbf24" },
+      { name: "Obsidian Golem", color: "#0f172a", accent: "#94a3b8" },
+      { name: "Abyssal Horror", color: "#311042", accent: "#a855f7" },
+      { name: "Plasma Warlord", color: "#14532d", accent: "#4ade80" },
+      { name: "Crimson Phoenix", color: "#991b1b", accent: "#f87171" },
+      { name: "Stellar Specter", color: "#1e1b4b", accent: "#818cf8" },
+      { name: "Venom Wyrm", color: "#365314", accent: "#bef264" },
+      { name: "Glacial Behemoth", color: "#082f49", accent: "#7dd3fc" },
+      { name: "Solar Destroyer", color: "#7c2d12", accent: "#fdba74" },
+      { name: "Void Stalker", color: "#2e1065", accent: "#d8b4fe" },
+      { name: "Neon Reaper", color: "#4c0519", accent: "#fda4af" },
+      { name: "Titanium Juggernaut", color: "#1e293b", accent: "#cbd5e1" },
+      { name: "Chaos Archon", color: "#450a0a", accent: "#fca5a5" },
+      { name: "The Infinite Apex", color: "#09090b", accent: "#00e5ff" }
+    ];
+
+    let player = { x: 0, y: 0, animX: 0, animY: 0 };
+    let exitPos = { x: 8, y: 8 };
+    let keyPos = null;
+    let monsters = []; 
+    let traps = []; 
+    let iceTiles = []; 
+    let crumblingTiles = []; 
+    let warpPads = []; 
+    let decoyCarrot = null; 
+    let laserWarnings = []; 
+    let collectibles = []; 
+    let mazeWalls = []; 
+
+    let movementDeck = [];
+    let powerupDeck = [];
+    let plannedQueue = [];
+
+    const MOVEMENT_CARDS = [
+      { id: 'UP', label: 'Up 1', icon: '⬆️', dx: 0, dy: -1, type: 'move' },
+      { id: 'DOWN', label: 'Down 1', icon: '⬇️', dx: 0, dy: 1, type: 'move' },
+      { id: 'LEFT', label: 'Left 1', icon: '⬅️', dx: -1, dy: 0, type: 'move' },
+      { id: 'RIGHT', label: 'Right 1', icon: '➡️', dx: 1, dy: 0, type: 'move' },
+      { id: 'JUMP_UP', label: 'Leap Up', icon: '🐰⬆️', dx: 0, dy: -2, type: 'jump' },
+      { id: 'JUMP_DOWN', label: 'Leap Down', icon: '🐰⬇️', dx: 0, dy: 2, type: 'jump' },
+      { id: 'JUMP_LEFT', label: 'Leap Left', icon: '🐰⬅️', dx: -2, dy: 0, type: 'jump' },
+      { id: 'JUMP_RIGHT', label: 'Leap Right', icon: '🐰➡️', dx: 2, dy: 0, type: 'jump' }
+    ];
+
+    const POWER_CARDS = [
+      { id: 'SHIELD', label: 'Shield', icon: '🛡️', type: 'power', effect: 'shield', desc: 'Shield: Protects you from the next damage instance.' },
+      { id: 'TELEPORT', label: 'Teleport', icon: '🌀', type: 'power', effect: 'teleport', desc: 'Teleport: Instantly teleports you to a random safe tile.' },
+      { id: 'FREEZE', label: 'Freeze', icon: '❄️', type: 'power', effect: 'freeze', desc: 'Freeze: Freezes all monsters in place for 2 turns.' },
+      { id: 'BOMB', label: 'Bomb', icon: '💣', type: 'power', effect: 'bomb', desc: 'Bomb: Destroys adjacent walls and damages nearby enemies.' },
+      { id: 'DECOY', label: 'Decoy', icon: '🥕✨', type: 'power', effect: 'decoy', desc: 'Decoy: Drops a carrot decoy to distract chasing monsters.' },
+      { id: 'LASER', label: 'Lightning', icon: '⚡', type: 'power', effect: 'laser', desc: 'Lightning: Fires a laser row and column beam clearing threats.' },
+      { id: 'GRAPPLE', label: 'Grapple', icon: '🪝', type: 'power', effect: 'grapple', desc: 'Grapple: Pulls you forward 3 tiles instantly.' },
+      { id: 'MAGNET', label: 'Magnet', icon: '🧲', type: 'power', effect: 'magnet', desc: 'Magnet: Instantly collects all map gems and keys.' },
+      { id: 'HEAL', label: 'Heal', icon: '💖', type: 'power', effect: 'heal', desc: 'Heal: Restores 1 health point.' },
+      { id: 'CLUSTER', label: 'Cluster Bomb', icon: '💣💥', type: 'power', effect: 'cluster', desc: 'Cluster Bomb: Blasts a 3x3 area of walls and enemies.' },
+      { id: 'SLOW', label: 'Time Slow', icon: '⏳', type: 'power', effect: 'slow', desc: 'Time Slow: Slows enemy turns for 4 rounds.' },
+      { id: 'PHASE', label: 'Phase Shift', icon: '👻', type: 'power', effect: 'phase', desc: 'Phase Shift: Makes adjacent walls passable and gives shield.' },
+      { id: 'BOOMERANG', label: 'Boomerang', icon: '🪃', type: 'power', effect: 'boomerang', desc: 'Boomerang: Attacks the closest enemy or boss.' },
+      { id: 'TORNADO', label: 'Tornado', icon: '🌪️', type: 'power', effect: 'tornado', desc: 'Tornado: Randomly scatters all monsters across the maze.' },
+      { id: 'FLASHBANG', label: 'Flashbang', icon: '🌟', type: 'power', effect: 'flash', desc: 'Flashbang: Stuns and blinds all monsters temporarily.' },
+      { id: 'MIRROR', label: 'Mirror Image', icon: '👥', type: 'power', effect: 'mirror', desc: 'Mirror Image: Spawns a glowing clone to distract enemies for 3 turns.' },
+      { id: 'PLASMA', label: 'Plasma Aura', icon: '💠', type: 'power', effect: 'plasma', desc: 'Plasma Aura: Surrounds you with plasma that zaps nearby touching monsters.' }
+    ];
+
+    let particles = [];
+
+    /* =========================================================================
+       2. SYNTHESIZED SOUND SYSTEM (Web Audio API)
+       ========================================================================= */
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+
+    function initAudio() {
+      if (!audioCtx) audioCtx = new AudioContext();
+    }
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+      initAudio();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      const now = audioCtx.currentTime;
+
+      switch(type) {
+        case 'select':
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(440, now);
+          osc.frequency.exponentialRampToValueAtTime(880, now + 0.08);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+          osc.start(now); osc.stop(now + 0.08);
+          break;
+        case 'hop':
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(240, now);
+          osc.frequency.exponentialRampToValueAtTime(580, now + 0.1);
+          gain.gain.setValueAtTime(0.18, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+          osc.start(now); osc.stop(now + 0.1);
+          break;
+        case 'gem':
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, now);
+          osc.frequency.setValueAtTime(783.99, now + 0.08);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+          osc.start(now); osc.stop(now + 0.2);
+          break;
+        case 'trap':
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(200, now);
+          osc.frequency.linearRampToValueAtTime(60, now + 0.25);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+          osc.start(now); osc.stop(now + 0.25);
+          break;
+        case 'powerup':
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(300, now);
+          osc.frequency.exponentialRampToValueAtTime(900, now + 0.25);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+          osc.start(now); osc.stop(now + 0.25);
+          break;
+        case 'bomb':
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(160, now);
+          osc.frequency.linearRampToValueAtTime(20, now + 0.35);
+          gain.gain.setValueAtTime(0.35, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+          osc.start(now); osc.stop(now + 0.35);
+          break;
+        case 'laser':
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(800, now);
+          osc.frequency.exponentialRampToValueAtTime(120, now + 0.3);
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+          osc.start(now); osc.stop(now + 0.3);
+          break;
+        case 'heal':
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(350, now);
+          osc.frequency.exponentialRampToValueAtTime(700, now + 0.2);
+          osc.frequency.exponentialRampToValueAtTime(1050, now + 0.4);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+          osc.start(now); osc.stop(now + 0.4);
+          break;
+        case 'magnet':
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(600, now);
+          osc.frequency.linearRampToValueAtTime(300, now + 0.3);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+          osc.start(now); osc.stop(now + 0.3);
+          break;
+        case 'wind':
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(150, now);
+          osc.frequency.linearRampToValueAtTime(450, now + 0.15);
+          osc.frequency.linearRampToValueAtTime(120, now + 0.3);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+          osc.start(now); osc.stop(now + 0.3);
+          break;
+        case 'boss_hit':
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(100, now);
+          osc.frequency.setValueAtTime(300, now + 0.1);
+          osc.frequency.setValueAtTime(80, now + 0.2);
+          gain.gain.setValueAtTime(0.4, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+          osc.start(now); osc.stop(now + 0.35);
+          break;
+        case 'win':
+          [523.25, 659.25, 783.99, 1046.50].forEach((f, idx) => {
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.connect(g); g.connect(audioCtx.destination);
+            o.type = 'triangle';
+            o.frequency.setValueAtTime(f, now + idx * 0.09);
+            g.gain.setValueAtTime(0.2, now + idx * 0.09);
+            g.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.09 + 0.18);
+            o.start(now + idx * 0.09); o.stop(now + idx * 0.09 + 0.18);
+          });
+          break;
+      }
+    }
+
+    /* =========================================================================
+       3. MAZE GENERATION & LEVEL SETUP
+       ========================================================================= */
+    function initLevel() {
+      isBossLevel = (level % 4 === 0);
+      
+      GRID_SIZE = isBossLevel ? 11 : Math.min(15, 9 + Math.floor((level - 1) / 3) * 2);
+      resizeCanvas();
+
+      player.x = 0; player.y = 0;
+      player.animX = 0; player.animY = 0;
+
+      exitPos = { x: GRID_SIZE - 1, y: GRID_SIZE - 1 };
+      keyCollected = !isBossLevel && level < 3; 
+      keyPos = null;
+      decoyCarrot = null;
+      mirrorClone = null;
+      plasmaTurns = 0;
+      laserWarnings = [];
+
+      generateMazeGrid();
+
+      if (isBossLevel) {
+        setupBossLevel();
+      } else {
+        boss = null;
+        spawnEntities();
+      }
+
+      const bossHud = document.getElementById('boss-hud');
+      if (isBossLevel) {
+        bossHud.classList.remove('hidden');
+        bossHud.classList.add('flex');
+        updateBossHUD();
+        setTipText(`⚠️ BOSS BATTLE: Defeat ${boss.title} to unlock the exit portal!`);
+      } else {
+        bossHud.classList.add('hidden');
+        bossHud.classList.remove('flex');
+        setTipText('Select cards to queue moves, then press RUN!');
+      }
+
+      plannedQueue = [];
+      rollDeck();
+      updateHUD();
+      renderQueueUI();
+    }
+
+    function generateMazeGrid() {
+      mazeWalls = Array(GRID_SIZE).fill(0).map(() => Array(GRID_SIZE).fill(0));
+      const wallDensity = isBossLevel ? 0.14 : Math.min(0.30, 0.16 + level * 0.015);
+
+      for (let r = 0; r < GRID_SIZE; r++) {
+        for (let c = 0; c < GRID_SIZE; c++) {
+          if ((r === 0 && c === 0) || (r === exitPos.y && c === exitPos.x)) continue;
+          if (Math.random() < wallDensity) mazeWalls[r][c] = 1;
+        }
+      }
+
+      if (!isPathExists(0, 0, exitPos.x, exitPos.y)) {
+        carvePath(0, 0, exitPos.x, exitPos.y);
+      }
+    }
+
+    function setupBossLevel() {
+      traps = [];
+      iceTiles = [];
+      crumblingTiles = [];
+      warpPads = [];
+      collectibles = [];
+      monsters = [];
+
+      const bossIndex = (Math.floor(level / 4) - 1) % BOSS_CATALOG.length;
+      const bossInfo = BOSS_CATALOG[bossIndex];
+      const maxBhp = 3 + Math.floor(level / 2);
+
+      boss = {
+        x: GRID_SIZE - 2, y: GRID_SIZE - 2,
+        animX: GRID_SIZE - 2, animY: GRID_SIZE - 2,
+        maxHp: maxBhp, hp: maxBhp,
+        title: bossInfo.name,
+        color: bossInfo.color,
+        accent: bossInfo.accent,
+        bossId: bossIndex + 1
+      };
+
+      document.getElementById('boss-name-text').innerHTML = `<span>👑</span><span>${boss.title.toUpperCase()}</span>`;
+
+      for (let r = boss.y - 1; r <= boss.y; r++) {
+        for (let c = boss.x - 1; c <= boss.x; c++) {
+          if (r >= 0 && c >= 0 && r < GRID_SIZE && c < GRID_SIZE) mazeWalls[r][c] = 0;
+        }
+      }
+
+      collectibles.push({ x: 1, y: 3, type: 'gem' }, { x: 4, y: 1, type: 'gem' }, { x: 3, y: GRID_SIZE - 2, type: 'gem' });
+      traps.push({ x: 2, y: 4, type: 'lava' }, { x: GRID_SIZE - 3, y: 2, type: 'crush' });
+    }
+
+    function isPathExists(startX, startY, targetX, targetY) {
+      const queue = [{ x: startX, y: startY }];
+      const visited = new Set([`${startX},${startY}`]);
+
+      while (queue.length > 0) {
+        const { x, y } = queue.shift();
+        if (x === targetX && y === targetY) return true;
+
+        const dirs = [[0,1],[0,-1],[1,0],[-1,0]];
+        for (let [dx, dy] of dirs) {
+          const nx = x + dx, ny = y + dy;
+          if (nx >= 0 && nx < GRID_SIZE && ny >= 0 && ny < GRID_SIZE) {
+            if (mazeWalls[ny][nx] === 0 && !visited.has(`${nx},${ny}`)) {
+              visited.add(`${nx},${ny}`);
+              queue.push({ x: nx, y: ny });
+            }
+          }
+        }
+      }
+      return false;
+    }
+
+    function carvePath(sx, sy, tx, ty) {
+      let cx = sx, cy = sy;
+      while (cx < tx || cy < ty) {
+        mazeWalls[cy][cx] = 0;
+        if (cx < tx && (Math.random() < 0.5 || cy === ty)) cx++;
+        else if (cy < ty) cy++;
+      }
+      mazeWalls[ty][tx] = 0;
+    }
+
+    function spawnEntities() {
+      traps = [];
+      iceTiles = [];
+      crumblingTiles = [];
+      warpPads = [];
+      collectibles = [];
+      monsters = [];
+
+      const openTiles = [];
+      for (let r = 0; r < GRID_SIZE; r++) {
+        for (let c = 0; c < GRID_SIZE; c++) {
+          if (mazeWalls[r][c] === 0 && !(r === 0 && c === 0) && !(r === exitPos.y && c === exitPos.x)) {
+            openTiles.push({ x: c, y: r });
+          }
+        }
+      }
+      openTiles.sort(() => Math.random() - 0.5);
+
+      if (level >= 3 && openTiles.length > 0) {
+        keyPos = openTiles.pop();
+      }
+
+      const crumbCount = Math.min(5, Math.floor(level * 0.7));
+      for (let i = 0; i < crumbCount && openTiles.length > 0; i++) {
+        crumblingTiles.push({ ...openTiles.pop(), cracked: false });
+      }
+
+      if (level >= 3 && openTiles.length >= 2) {
+        const p1 = openTiles.pop();
+        const p2 = openTiles.pop();
+        warpPads.push({ x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y });
+      }
+
+      const iceCount = Math.min(5, Math.floor(level * 0.6));
+      for (let i = 0; i < iceCount && openTiles.length > 0; i++) {
+        iceTiles.push(openTiles.pop());
+      }
+
+      const trapTypes = ['spikes', 'lava', 'crush', 'teleport'];
+      const trapCount = Math.min(6, 2 + Math.floor(level * 0.8));
+      for (let i = 0; i < trapCount && openTiles.length > 0; i++) {
+        const pt = openTiles.pop();
+        traps.push({ x: pt.x, y: pt.y, type: trapTypes[Math.floor(Math.random() * trapTypes.length)] });
+      }
+
+      const gemCount = Math.min(8, 3 + Math.floor(level * 0.7));
+      for (let i = 0; i < gemCount && openTiles.length > 0; i++) {
+        const pt = openTiles.pop();
+        collectibles.push({ x: pt.x, y: pt.y, type: 'gem' });
+      }
+
+      const monsterCount = Math.min(6, 1 + Math.floor(level / 1.1));
+      for (let i = 0; i < monsterCount && openTiles.length > 0; i++) {
+        const pt = openTiles.pop();
+        const randType = Math.random();
+        let mType = 'patrol';
+        if (randType > 0.6) mType = 'chaser';
+        else if (randType > 0.35) mType = 'blink';
+
+        monsters.push({
+          x: pt.x, y: pt.y,
+          animX: pt.x, animY: pt.y,
+          type: mType,
+          dir: Math.random() > 0.5 ? 1 : -1,
+          axis: Math.random() > 0.5 ? 'X' : 'Y'
+        });
+      }
+    }
+
+    function rollDeck() {
+      movementDeck = [];
+      powerupDeck = [];
+
+      for (let i = 0; i < 8; i++) {
+        const cardType = MOVEMENT_CARDS[Math.floor(Math.random() * MOVEMENT_CARDS.length)];
+        movementDeck.push({ ...cardType, uid: Math.random().toString(36).substring(2, 9), used: false });
+      }
+
+      const powerCount = Math.random() < 0.5 ? 2 : 3;
+      for (let i = 0; i < powerCount; i++) {
+        const cardType = POWER_CARDS[Math.floor(Math.random() * POWER_CARDS.length)];
+        powerupDeck.push({ ...cardType, uid: Math.random().toString(36).substring(2, 9), used: false });
+      }
+
+      renderDeckUI();
+    }
+
+    /* =========================================================================
+       4. UI, DECK & QUEUE RENDERERS
+       ========================================================================= */
+    function renderDeckUI() {
+      const deckContainer = document.getElementById('deck-container');
+      deckContainer.innerHTML = '';
+
+      movementDeck.forEach((card) => {
+        const btn = document.createElement('button');
+        btn.className = `card-item p-1.5 sm:p-2 rounded-xl flex flex-col items-center justify-center border transition shadow-lg ${
+          card.used 
+            ? 'opacity-20 border-slate-800 bg-slate-900 pointer-events-none' 
+            : 'bg-slate-900/90 hover:bg-slate-800 border-cyan-500/40 hover:border-cyan-400 glow-cyan cursor-pointer'
+        }`;
+        btn.onclick = () => selectCard(card);
+        btn.innerHTML = `
+          <span class="text-sm sm:text-xl mb-0.5">${card.icon}</span>
+          <span class="text-[9px] sm:text-[10px] font-bold text-cyan-200 tracking-tight leading-tight">${card.label}</span>
+        `;
+        deckContainer.appendChild(btn);
+      });
+
+      const powerContainer = document.getElementById('powerup-deck-container');
+      powerContainer.innerHTML = '';
+
+      powerupDeck.forEach((card) => {
+        const btn = document.createElement('button');
+        btn.className = `card-item w-full p-2 rounded-xl flex items-center space-x-2 border transition shadow-md ${
+          card.used 
+            ? 'opacity-20 border-slate-800 bg-slate-900 pointer-events-none' 
+            : 'bg-amber-950/40 hover:bg-amber-900/60 border-amber-500/60 glow-amber cursor-pointer'
+        }`;
+        
+        btn.onmouseenter = () => updatePowerupDesc(card.desc);
+        btn.onclick = () => {
+          updatePowerupDesc(card.desc);
+          setTipText(`⚡ ${card.desc}`);
+          selectCard(card);
+        };
+
+        btn.innerHTML = `
+          <span class="text-lg">${card.icon}</span>
+          <div class="text-left leading-tight">
+            <p class="text-[10px] font-bold text-amber-300">${card.label}</p>
+            <p class="text-[8px] text-slate-400 uppercase">Power-Up</p>
+          </div>
+        `;
+        powerContainer.appendChild(btn);
+      });
+    }
+
+    function updatePowerupDesc(text) {
+      const descBox = document.getElementById('powerup-desc-box');
+      if (descBox) descBox.innerText = text;
+    }
+
+    function renderQueueUI() {
+      const queueContainer = document.getElementById('queue-container');
+      const executeBtn = document.getElementById('execute-btn');
+      const clearBtn = document.getElementById('clear-btn');
+      const undoBtn = document.getElementById('undo-btn');
+
+      queueContainer.innerHTML = '';
+
+      if (plannedQueue.length === 0) {
+        const emptyText = document.createElement('span');
+        emptyText.id = 'queue-empty-text';
+        emptyText.className = 'text-xs text-slate-500 italic pl-2';
+        emptyText.innerText = 'Planned cards appear here...';
+        queueContainer.appendChild(emptyText);
+
+        executeBtn.disabled = true;
+        clearBtn.disabled = true;
+        undoBtn.disabled = true;
+        return;
+      }
+
+      executeBtn.disabled = false;
+      clearBtn.disabled = false;
+      undoBtn.disabled = false;
+
+      plannedQueue.forEach((card) => {
+        const item = document.createElement('div');
+        const isPower = card.type === 'power';
+        item.className = `flex items-center space-x-1 px-2 py-1 rounded-lg border text-xs shrink-0 ${
+          isPower ? 'bg-amber-950/60 border-amber-500/50 text-amber-300' : 'bg-slate-800 border-cyan-500/30 text-cyan-300'
+        }`;
+        item.innerHTML = `
+          <span class="text-xs sm:text-sm">${card.icon}</span>
+          <span class="font-bold">${card.label}</span>
+        `;
+        queueContainer.appendChild(item);
+      });
+    }
+
+    function selectCard(card) {
+      if (isExecuting || card.used) return;
+      card.used = true;
+      plannedQueue.push(card);
+      playSound('select');
+      renderDeckUI();
+      renderQueueUI();
+    }
+
+    document.getElementById('undo-btn').onclick = () => {
+      if (isExecuting || plannedQueue.length === 0) return;
+      const lastCard = plannedQueue.pop();
+      lastCard.used = false;
+      playSound('select');
+      renderDeckUI();
+      renderQueueUI();
+    };
+
+    document.getElementById('clear-btn').onclick = () => {
+      if (isExecuting) return;
+      movementDeck.forEach(c => c.used = false);
+      powerupDeck.forEach(c => c.used = false);
+      plannedQueue = [];
+      playSound('select');
+      renderDeckUI();
+      renderQueueUI();
+    };
+
+    document.getElementById('reroll-btn').onclick = () => {
+      if (isExecuting || rerolls <= 0) return;
+      rerolls--;
+      playSound('select');
+      plannedQueue = [];
+      rollDeck();
+      renderQueueUI();
+      updateHUD();
+    };
+
+    document.getElementById('execute-btn').onclick = () => {
+      if (isExecuting || plannedQueue.length === 0) return;
+      executePlayerMoves();
+    };
+
+    document.getElementById('restart-btn').onclick = () => {
+      level = 1; hp = maxHp; gems = 0; turnCount = 1; rerolls = 1;
+      hasShield = false; freezeTurns = 0; mirrorClone = null; plasmaTurns = 0;
+      initLevel();
+    };
+
+    document.getElementById('sound-btn').onclick = (e) => {
+      soundEnabled = !soundEnabled;
+      e.target.innerText = soundEnabled ? '🔊' : '🔇';
+    };
+
+    function updateHUD() {
+      document.getElementById('hp-display').innerText = `${hp}/${maxHp}`;
+      document.getElementById('gems-display').innerText = gems;
+      document.getElementById('level-display').innerText = level;
+      document.getElementById('turn-display').innerText = turnCount;
+      document.getElementById('reroll-text').innerText = `Reroll (${rerolls})`;
+      document.getElementById('reroll-btn').disabled = rerolls <= 0;
+
+      const shieldInd = document.getElementById('shield-indicator');
+      if (hasShield) shieldInd.classList.remove('hidden'), shieldInd.classList.add('flex');
+      else shieldInd.classList.add('hidden'), shieldInd.classList.remove('flex');
+    }
+
+    function updateBossHUD() {
+      if (!boss) return;
+      document.getElementById('boss-hp-text').innerText = `HP: ${boss.hp}/${boss.maxHp}`;
+      const pct = Math.max(0, (boss.hp / boss.maxHp) * 100);
+      document.getElementById('boss-hp-bar').style.width = `${pct}%`;
+    }
+
+    function triggerScreenShake() {
+      const wrapper = document.getElementById('canvas-wrapper');
+      wrapper.classList.remove('shake');
+      void wrapper.offsetWidth;
+      wrapper.classList.add('shake');
+    }
+
+    /* =========================================================================
+       5. MOVEMENT EXECUTION & GAME LOGIC
+       ========================================================================= */
+    async function executePlayerMoves() {
+      isExecuting = true;
+      document.getElementById('execute-btn').disabled = true;
+
+      if (isBossLevel && laserWarnings.length > 0) {
+        await fireTelegraphedLasers();
+      }
+
+      for (let i = 0; i < plannedQueue.length; i++) {
+        const card = plannedQueue[i];
+
+        if (card.type === 'power') {
+          await handlePowerCard(card);
+          continue;
+        }
+
+        let nextX = player.x + card.dx;
+        let nextY = player.y + card.dy;
+        let validMove = true;
+
+        if (nextX < 0 || nextX >= GRID_SIZE || nextY < 0 || nextY >= GRID_SIZE) {
+          validMove = false;
+        } else if (card.type !== 'jump') {
+          if (mazeWalls[nextY][nextX] !== 0) validMove = false;
+        } else {
+          if (mazeWalls[nextY][nextX] !== 0) validMove = false;
+        }
+
+        if (validMove) {
+          checkCrumblingTileDeparture(player.x, player.y);
+
+          playSound('hop');
+          addParticles(player.x, player.y, 8, activeSkin.color);
+          await animateMove(player, nextX, nextY, 200);
+          player.x = nextX; player.y = nextY;
+
+          checkWarpPads();
+
+          if (isIceTile(player.x, player.y)) {
+            const slideX = player.x + (card.dx !== 0 ? Math.sign(card.dx) : 0);
+            const slideY = player.y + (card.dy !== 0 ? Math.sign(card.dy) : 0);
+            if (slideX >= 0 && slideX < GRID_SIZE && slideY >= 0 && slideY < GRID_SIZE && mazeWalls[slideY][slideX] === 0) {
+              playSound('powerup');
+              addParticles(player.x, player.y, 10, '#38bdf8');
+              await animateMove(player, slideX, slideY, 150);
+              player.x = slideX; player.y = slideY;
+            }
+          }
+
+          if (keyPos && !keyCollected && player.x === keyPos.x && player.y === keyPos.y) {
+            keyCollected = true;
+            playSound('powerup');
+            addParticles(player.x, player.y, 15, '#f59e0b');
+          }
+
+          checkCollectibles();
+
+          if (checkTraps()) {
+            if (hp <= 0) {
+              showGameOverModal(false, "Slipped into a deadly trap!");
+              isExecuting = false; return;
+            }
+          }
+
+          if (checkMonsterCollisions()) {
+            if (hp <= 0) {
+              showGameOverModal(false, isBossLevel ? `Crushed by ${boss.title}!` : "Caught by a shadow monster!");
+              isExecuting = false; return;
+            }
+          }
+
+          if (player.x === exitPos.x && player.y === exitPos.y) {
+            if (isBossLevel && boss && boss.hp > 0) {
+              setTipText(`⚠️ Defeat ${boss.title} before entering the portal!`);
+            } else if (!keyCollected) {
+              setTipText('🔑 You need to collect the Golden Key first!');
+            } else {
+              playSound('win');
+              addParticles(exitPos.x, exitPos.y, 25, '#38bdf8');
+              await new Promise(r => setTimeout(r, 400));
+              showGameOverModal(true, isBossLevel ? `Boss Defeated! Portal Unlocked!` : `Level ${level} Cleared!`);
+              isExecuting = false; return;
+            }
+          }
+        } else {
+          triggerScreenShake();
+          addParticles(player.x, player.y, 10, '#e2e8f0');
+          playSound('trap');
+          await new Promise(r => setTimeout(r, 120));
+        }
+      }
+
+      if (freezeTurns > 0) freezeTurns--;
+      if (decoyCarrot) {
+        decoyCarrot.turnsLeft--;
+        if (decoyCarrot.turnsLeft <= 0) decoyCarrot = null;
+      }
+      if (mirrorClone) {
+        mirrorClone.turnsLeft--;
+        if (mirrorClone.turnsLeft <= 0) mirrorClone = null;
+      }
+      if (plasmaTurns > 0) {
+        plasmaTurns--;
+        monsters.forEach((m, idx) => {
+          if (Math.abs(m.x - player.x) <= 1 && Math.abs(m.y - player.y) <= 1) {
+            addParticles(m.x, m.y, 15, '#38bdf8');
+            monsters.splice(idx, 1);
+            playSound('bomb');
+          }
+        });
+      }
+
+      if (freezeTurns <= 0) {
+        if (isBossLevel && boss && boss.hp > 0) {
+          await moveBoss();
+        } else {
+          await moveMonsters();
+        }
+      }
+
+      if (checkMonsterCollisions()) {
+        if (hp <= 0) {
+          showGameOverModal(false, isBossLevel ? `Crushed by ${boss.title}!` : "Caught by a shadow monster!");
+          isExecuting = false; return;
+        }
+      }
+
+      turnCount++;
+      if (turnCount % 3 === 0) rerolls++;
+      plannedQueue = [];
+      rollDeck();
+      updateHUD();
+      renderQueueUI();
+      isExecuting = false;
+    }
+
+    async function handlePowerCard(card) {
+      if (card.effect === 'shield') {
+        playSound('powerup');
+        hasShield = true;
+        addParticles(player.x, player.y, 15, '#38bdf8');
+        updateHUD();
+      } else if (card.effect === 'teleport') {
+        playSound('powerup');
+        const safeTiles = [];
+        for (let r = 0; r < GRID_SIZE; r++) {
+          for (let c = 0; c < GRID_SIZE; c++) {
+            if (mazeWalls[r][c] === 0 && !(r === player.y && c === player.x)) safeTiles.push({ x: c, y: r });
+          }
+        }
+        if (safeTiles.length > 0) {
+          const dest = safeTiles[Math.floor(Math.random() * safeTiles.length)];
+          addParticles(player.x, player.y, 12, '#a855f7');
+          player.x = dest.x; player.y = dest.y;
+          player.animX = dest.x; player.animY = dest.y;
+          addParticles(dest.x, dest.y, 12, '#a855f7');
+        }
+      } else if (card.effect === 'freeze') {
+        playSound('powerup');
+        freezeTurns = 2;
+        addParticles(player.x, player.y, 15, '#93c5fd');
+      } else if (card.effect === 'bomb') {
+        playSound('bomb');
+        triggerScreenShake();
+        const dirs = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[-1,-1],[1,-1],[-1,1]];
+        dirs.forEach(([dx, dy]) => {
+          const nx = player.x + dx, ny = player.y + dy;
+          if (nx >= 0 && nx < GRID_SIZE && ny >= 0 && ny < GRID_SIZE) {
+            if (mazeWalls[ny][nx] === 1) {
+              mazeWalls[ny][nx] = 0;
+              addParticles(nx, ny, 10, '#f59e0b');
+            }
+          }
+          if (isBossLevel && boss && Math.abs(boss.x - nx) <= 1 && Math.abs(boss.y - ny) <= 1) {
+            damageBoss(1);
+          }
+        });
+      } else if (card.effect === 'decoy') {
+        playSound('powerup');
+        decoyCarrot = { x: player.x, y: player.y, turnsLeft: 2 };
+        addParticles(player.x, player.y, 15, '#f59e0b');
+      } else if (card.effect === 'laser') {
+        playSound('laser');
+        triggerScreenShake();
+        for (let i = 0; i < GRID_SIZE; i++) {
+          if (mazeWalls[player.y][i] === 1) mazeWalls[player.y][i] = 0;
+          if (mazeWalls[i][player.x] === 1) mazeWalls[i][player.x] = 0;
+          addParticles(i, player.y, 4, '#38bdf8');
+          addParticles(player.x, i, 4, '#38bdf8');
+        }
+        if (isBossLevel && boss && (boss.x === player.x || boss.y === player.y || boss.x - 1 === player.x || boss.y - 1 === player.y)) {
+          damageBoss(1);
+        }
+      } else if (card.effect === 'grapple') {
+        playSound('powerup');
+        const dirs = [{dx: 0, dy:-3}, {dx: 0, dy:3}, {dx: -3, dy:0}, {dx: 3, dy:0}];
+        for (let d of dirs) {
+          const gx = player.x + d.dx, gy = player.y + d.dy;
+          if (gx >= 0 && gx < GRID_SIZE && gy >= 0 && gy < GRID_SIZE && mazeWalls[gy][gx] === 0) {
+            addParticles(player.x, player.y, 10, '#38bdf8');
+            await animateMove(player, gx, gy, 160);
+            player.x = gx; player.y = gy;
+            break;
+          }
+        }
+      }
+      else if (card.effect === 'magnet') {
+        playSound('magnet');
+        let countCollected = collectibles.length;
+        if (countCollected > 0) {
+          gems += countCollected * 10;
+          collectibles = [];
+          addParticles(player.x, player.y, 20, '#fbbf24');
+        }
+        if (keyPos && !keyCollected) {
+          keyCollected = true;
+          addParticles(player.x, player.y, 15, '#f59e0b');
+        }
+        updateHUD();
+      }
+      else if (card.effect === 'heal') {
+        playSound('heal');
+        if (hp < maxHp) {
+          hp++;
+          updateHUD();
+        }
+        addParticles(player.x, player.y, 20, '#f43f5e');
+      }
+      else if (card.effect === 'cluster') {
+        playSound('bomb');
+        triggerScreenShake();
+        for (let r = player.y - 1; r <= player.y + 1; r++) {
+          for (let c = player.x - 1; c <= player.x + 1; c++) {
+            if (r >= 0 && r < GRID_SIZE && c >= 0 && c < GRID_SIZE) {
+              if (mazeWalls[r][c] === 1) mazeWalls[r][c] = 0;
+              addParticles(c, r, 8, '#ff6b00');
+            }
+          }
+        }
+        if (isBossLevel && boss && Math.abs(boss.x - player.x) <= 2 && Math.abs(boss.y - player.y) <= 2) {
+          damageBoss(2);
+        }
+      }
+      else if (card.effect === 'slow') {
+        playSound('powerup');
+        freezeTurns = 4;
+        addParticles(player.x, player.y, 25, '#38bdf8');
+      }
+      else if (card.effect === 'phase') {
+        playSound('powerup');
+        const dirs = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[-1,-1],[1,-1],[-1,1]];
+        dirs.forEach(([dx, dy]) => {
+          const nx = player.x + dx, ny = player.y + dy;
+          if (nx >= 0 && nx < GRID_SIZE && ny >= 0 && ny < GRID_SIZE) {
+            mazeWalls[ny][nx] = 0; 
+            traps = traps.filter(t => !(t.x === nx && t.y === ny)); 
+            addParticles(nx, ny, 6, '#c084fc');
+          }
+        });
+        hasShield = true;
+        updateHUD();
+      }
+      else if (card.effect === 'boomerang') {
+        playSound('wind');
+        if (isBossLevel && boss && boss.hp > 0) {
+          damageBoss(1);
+        } else if (monsters.length > 0) {
+          let closestIdx = 0;
+          let minDist = 999;
+          monsters.forEach((m, idx) => {
+            let dist = Math.hypot(m.x - player.x, m.y - player.y);
+            if (dist < minDist) { minDist = dist; closestIdx = idx; }
+          });
+          const targetM = monsters[closestIdx];
+          addParticles(targetM.x, targetM.y, 18, '#f59e0b');
+          monsters.splice(closestIdx, 1); 
+        }
+      }
+      else if (card.effect === 'tornado') {
+        playSound('wind');
+        triggerScreenShake();
+        const openTiles = [];
+        for (let r = 0; r < GRID_SIZE; r++) {
+          for (let c = 0; c < GRID_SIZE; c++) {
+            if (mazeWalls[r][c] === 0 && !(r === player.y && c === player.x) && !(r === exitPos.y && c === exitPos.x)) {
+              openTiles.push({ x: c, y: r });
+            }
+          }
+        }
+        openTiles.sort(() => Math.random() - 0.5);
+        monsters.forEach(m => {
+          if (openTiles.length > 0) {
+            const pt = openTiles.pop();
+            addParticles(m.x, m.y, 10, '#38bdf8');
+            m.x = pt.x; m.y = pt.y;
+            m.animX = pt.x; m.animY = pt.y;
+            addParticles(pt.x, pt.y, 10, '#a855f7');
+          }
+        });
+      }
+      else if (card.effect === 'flash') {
+        playSound('powerup');
+        freezeTurns = 2;
+        for (let r = 0; r < GRID_SIZE; r++) {
+          for (let c = 0; c < GRID_SIZE; c++) {
+            addParticles(c, r, 2, '#fef08a');
+          }
+        }
+      }
+      else if (card.effect === 'mirror') {
+        playSound('powerup');
+        mirrorClone = { x: player.x, y: player.y, turnsLeft: 3 };
+        addParticles(player.x, player.y, 18, '#c084fc');
+      }
+      else if (card.effect === 'plasma') {
+        playSound('powerup');
+        plasmaTurns = 3;
+        addParticles(player.x, player.y, 22, '#38bdf8');
+      }
+
+      await new Promise(r => setTimeout(r, 200));
+    }
+
+    function checkCrumblingTileDeparture(x, y) {
+      const tileIndex = crumblingTiles.findIndex(t => t.x === x && t.y === y);
+      if (tileIndex !== -1) {
+        if (!crumblingTiles[tileIndex].cracked) {
+          crumblingTiles[tileIndex].cracked = true;
+        } else {
+          mazeWalls[y][x] = 2; 
+          crumblingTiles.splice(tileIndex, 1);
+          addParticles(x, y, 10, '#78350f');
+        }
+      }
+    }
+
+    function checkWarpPads() {
+      warpPads.forEach(w => {
+        if (player.x === w.x1 && player.y === w.y1) {
+          playSound('powerup');
+          player.x = w.x2; player.y = w.y2;
+          player.animX = w.x2; player.animY = w.y2;
+          addParticles(w.x2, w.y2, 12, '#38bdf8');
+        } else if (player.x === w.x2 && player.y === w.y2) {
+          playSound('powerup');
+          player.x = w.x1; player.y = w.y1;
+          player.animX = w.x1; player.animY = w.y1;
+          addParticles(w.x1, w.y1, 12, '#38bdf8');
+        }
+      });
+    }
+
+    function damageBoss(amt) {
+      if (!boss || boss.hp <= 0) return;
+      boss.hp -= amt;
+      playSound('boss_hit');
+      triggerScreenShake();
+      addParticles(boss.x, boss.y, 20, boss.accent);
+      updateBossHUD();
+
+      if (boss.hp <= 0) {
+        setTipText(`🎉 ${boss.title} was defeated! Exit portal unlocked!`);
+        keyCollected = true;
+      }
+    }
+
+    async function moveBoss() {
+      if (!boss || boss.hp <= 0) return;
+
+      const target = mirrorClone ? mirrorClone : (decoyCarrot ? decoyCarrot : player);
+      let nextX = boss.x;
+      let nextY = boss.y;
+
+      if (boss.x < target.x) nextX++;
+      else if (boss.x > target.x) nextX--;
+
+      if (boss.y < target.y) nextY++;
+      else if (boss.y > target.y) nextY--;
+
+      boss.x = nextX; boss.y = nextY;
+      await animateMove(boss, nextX, nextY, 200);
+
+      traps.forEach((t, idx) => {
+        if (t.type === 'lava' && Math.abs(t.x - boss.x) <= 1 && Math.abs(t.y - boss.y) <= 1) {
+          damageBoss(1);
+          traps.splice(idx, 1);
+        }
+      });
+
+      laserWarnings = [];
+      if (Math.random() > 0.4) {
+        laserWarnings.push({ type: 'row', index: player.y });
+      } else {
+        laserWarnings.push({ type: 'col', index: player.x });
+      }
+    }
+
+    async function fireTelegraphedLasers() {
+      playSound('laser');
+      triggerScreenShake();
+
+      laserWarnings.forEach(warn => {
+        if (warn.type === 'row') {
+          if (player.y === warn.index) applyDamage();
+          for (let c = 0; c < GRID_SIZE; c++) addParticles(c, warn.index, 6, boss.accent);
+        } else if (warn.type === 'col') {
+          if (player.x === warn.index) applyDamage();
+          for (let r = 0; r < GRID_SIZE; r++) addParticles(warn.index, r, 6, boss.accent);
+        }
+      });
+
+      laserWarnings = [];
+      await new Promise(r => setTimeout(r, 200));
+    }
+
+    function isIceTile(x, y) {
+      return iceTiles.some(t => t.x === x && t.y === y);
+    }
+
+    function animateMove(entity, targetX, targetY, duration) {
+      return new Promise((resolve) => {
+        const startX = entity.animX, startY = entity.animY;
+        const startTime = performance.now();
+
+        function step(now) {
+          const elapsed = now - startTime;
+          const progress = Math.min(1, elapsed / duration);
+          entity.animX = startX + (targetX - startX) * progress;
+          entity.animY = startY + (targetY - startY) * progress;
+
+          if (progress < 1) requestAnimationFrame(step);
+          else {
+            entity.animX = targetX; entity.animY = targetY;
+            resolve();
+          }
+        }
+        requestAnimationFrame(step);
+      });
+    }
+
+    async function moveMonsters() {
+      const target = mirrorClone ? mirrorClone : (decoyCarrot ? decoyCarrot : player);
+
+      for (let monster of monsters) {
+        let targetX = monster.x;
+        let targetY = monster.y;
+
+        if (monster.type === 'patrol') {
+          let dx = monster.axis === 'X' ? monster.dir : 0;
+          let dy = monster.axis === 'Y' ? monster.dir : 0;
+
+          if (monster.x + dx < 0 || monster.x + dx >= GRID_SIZE || monster.y + dy < 0 || monster.y + dy >= GRID_SIZE || mazeWalls[monster.y + dy][monster.x + dx] !== 0) {
+            monster.dir *= -1;
+            dx = monster.axis === 'X' ? monster.dir : 0;
+            dy = monster.axis === 'Y' ? monster.dir : 0;
+          }
+
+          if (mazeWalls[monster.y + dy]?.[monster.x + dx] === 0) {
+            targetX += dx; targetY += dy;
+          }
+        } else if (monster.type === 'chaser') {
+          const step = getNextBfsStep(monster.x, monster.y, target.x, target.y);
+          if (step) { targetX = step.x; targetY = step.y; }
+        } else if (monster.type === 'blink') {
+          if (turnCount % 3 === 0) {
+            const openTiles = [];
+            for (let r = 0; r < GRID_SIZE; r++) {
+              for (let c = 0; c < GRID_SIZE; c++) {
+                if (mazeWalls[r][c] === 0 && !(r === player.y && c === player.x)) openTiles.push({ x: c, y: r });
+              }
+            }
+            if (openTiles.length > 0) {
+              const pt = openTiles[Math.floor(Math.random() * openTiles.length)];
+              targetX = pt.x; targetY = pt.y;
+            }
+          }
+        }
+
+        monster.x = targetX; monster.y = targetY;
+        await animateMove(monster, targetX, targetY, 180);
+      }
+    }
+
+    function getNextBfsStep(sx, sy, tx, ty) {
+      const queue = [[{ x: sx, y: sy }]];
+      const visited = new Set([`${sx},${sy}`]);
+
+      while (queue.length > 0) {
+        const path = queue.shift();
+        const curr = path[path.length - 1];
+
+        if (curr.x === tx && curr.y === ty) {
+          return path.length > 1 ? path[1] : null;
+        }
+
+        const dirs = [[0,1],[0,-1],[1,0],[-1,0]];
+        for (let [dx, dy] of dirs) {
+          const nx = curr.x + dx, ny = curr.y + dy;
+          if (nx >= 0 && nx < GRID_SIZE && ny >= 0 && ny < GRID_SIZE) {
+            if (mazeWalls[ny][nx] === 0 && !visited.has(`${nx},${ny}`)) {
+              visited.add(`${nx},${ny}`);
+              queue.push([...path, { x: nx, y: ny }]);
+            }
+          }
+        }
+      }
+      return null;
+    }
+
+    function checkCollectibles() {
+      for (let i = collectibles.length - 1; i >= 0; i--) {
+        if (collectibles[i].x === player.x && collectibles[i].y === player.y) {
+          gems += 10;
+          playSound('gem');
+          addParticles(player.x, player.y, 12, '#fbbf24');
+          collectibles.splice(i, 1);
+          updateHUD();
+        }
+      }
+    }
+
+    function checkTraps() {
+      for (let trap of traps) {
+        if (trap.x === player.x && trap.y === player.y) {
+          if (trap.type === 'teleport') {
+            playSound('powerup');
+            const safeTiles = [];
+            for (let r = 0; r < GRID_SIZE; r++) {
+              for (let c = 0; c < GRID_SIZE; c++) {
+                if (mazeWalls[r][c] === 0 && !(r === player.y && c === player.x)) safeTiles.push({ x: c, y: r });
+              }
+            }
+            if (safeTiles.length > 0) {
+              const dest = safeTiles[Math.floor(Math.random() * safeTiles.length)];
+              addParticles(player.x, player.y, 15, '#a855f7');
+              player.x = dest.x; player.y = dest.y;
+              player.animX = dest.x; player.animY = dest.y;
+              addParticles(dest.x, dest.y, 15, '#a855f7');
+            }
+            return false;
+          }
+          return applyDamage();
+        }
+      }
+      if (mazeWalls[player.y][player.x] === 2) {
+        return applyDamage(); 
+      }
+      return false;
+    }
+
+    function checkMonsterCollisions() {
+      if (isBossLevel && boss && boss.hp > 0) {
+        if (Math.abs(boss.x - player.x) <= 1 && Math.abs(boss.y - player.y) <= 1) {
+          return applyDamage();
+        }
+      }
+      for (let m of monsters) {
+        if (m.x === player.x && m.y === player.y) {
+          return applyDamage();
+        }
+      }
+      return false;
+    }
+
+    function applyDamage() {
+      if (hasShield) {
+        hasShield = false;
+        playSound('powerup');
+        addParticles(player.x, player.y, 15, '#38bdf8');
+        updateHUD();
+        return false;
+      }
+      hp--;
+      triggerScreenShake();
+      playSound('trap');
+      addParticles(player.x, player.y, 15, '#f43f5e');
+      updateHUD();
+      return true;
+    }
+
+    function setTipText(text) {
+      document.getElementById('tip-text').innerText = text;
+    }
+
+    /* =========================================================================
+       6. CARROT SHOP & CATEGORIZED SKINS
+       ========================================================================= */
+    const shopModal = document.getElementById('shop-modal');
+    document.getElementById('shop-btn').onclick = () => {
+      renderSkinsGrid();
+      shopModal.classList.remove('hidden');
+    };
+    document.getElementById('close-shop-btn').onclick = () => shopModal.classList.add('hidden');
+
+    document.querySelectorAll('.skin-tab-btn').forEach(btn => {
+      btn.onclick = (e) => {
+        document.querySelectorAll('.skin-tab-btn').forEach(b => {
+          b.classList.remove('bg-cyan-500', 'text-slate-950');
+          b.classList.add('text-slate-300');
+        });
+        e.target.classList.add('bg-cyan-500', 'text-slate-950');
+        e.target.classList.remove('text-slate-300');
+        activeSkinCategory = e.target.getAttribute('data-cat');
+        renderSkinsGrid();
+      };
+    });
+
+    document.getElementById('buy-hp-btn').onclick = () => {
+      if (gems >= 30) {
+        gems -= 30; maxHp++; hp++;
+        playSound('powerup');
+        updateHUD();
+        document.getElementById('buy-hp-btn').disabled = true;
+      }
+    };
+    document.getElementById('buy-reroll-btn').onclick = () => {
+      if (gems >= 15) {
+        gems -= 15; rerolls += 2;
+        playSound('powerup');
+        updateHUD();
+      }
+    };
+    document.getElementById('buy-shield-btn').onclick = () => {
+      if (gems >= 20 && !hasShield) {
+        gems -= 20; hasShield = true;
+        playSound('powerup');
+        updateHUD();
+      }
+    };
+
+    function renderSkinsGrid() {
+      const grid = document.getElementById('skins-grid');
+      grid.innerHTML = '';
+
+      const filteredSkins = SKINS.filter(s => s.category === activeSkinCategory);
+
+      filteredSkins.forEach(skin => {
+        const item = document.createElement('div');
+        item.className = `p-2.5 rounded-2xl border flex flex-col items-center justify-between bg-slate-800/80 ${
+          activeSkin.id === skin.id ? 'border-cyan-400 glow-cyan' : 'border-slate-700'
+        }`;
+
+        let iconEmoji = '🐰';
+        if (skin.type === 'cat') iconEmoji = '🐱';
+        else if (skin.type === 'dog') iconEmoji = '🐶';
+        else if (skin.type === 'hamster') iconEmoji = '🐹';
+        else if (skin.type === 'duck') iconEmoji = '🦆';
+        else if (skin.type === 'penguin') iconEmoji = '🐧';
+        else if (skin.type === 'fox') iconEmoji = '🦊';
+        else if (skin.type === 'owl') iconEmoji = '🦉';
+        else if (skin.type === 'mouse') iconEmoji = '🐭';
+        else if (skin.type === 'bear') iconEmoji = '🐻';
+        else if (skin.type === 'panda') iconEmoji = '🐼';
+        else if (skin.type === 'koala') iconEmoji = '🐨';
+        else if (skin.type === 'frog') iconEmoji = '🐸';
+        else if (skin.type === 'tiger') iconEmoji = '🐯';
+        else if (skin.type === 'lion') iconEmoji = '🦁';
+        else if (skin.type === 'wolf') iconEmoji = '🐺';
+        else if (skin.type === 'raccoon') iconEmoji = '🦝';
+        else if (skin.type === 'hedgehog') iconEmoji = '🦔';
+        else if (skin.type === 'squirrel') iconEmoji = '🐿️';
+
+        item.innerHTML = `
+          <div class="w-8 h-8 rounded-full mb-1 flex items-center justify-center font-bold shadow" style="background:${skin.color}">${iconEmoji}</div>
+          <p class="text-[11px] font-bold text-slate-200 text-center leading-tight mb-1">${skin.name}</p>
+          <button class="w-full py-1 text-[10px] font-bold rounded-xl transition ${
+            activeSkin.id === skin.id 
+              ? 'bg-cyan-500 text-slate-950 cursor-default'
+              : 'bg-slate-700 hover:bg-slate-600 text-white'
+          }">
+            ${activeSkin.id === skin.id ? 'Equipped' : 'Equip (Free)'}
+          </button>
+        `;
+
+        const btn = item.querySelector('button');
+        if (activeSkin.id !== skin.id) {
+          btn.onclick = () => {
+            activeSkin = skin;
+            playSound('powerup');
+            renderSkinsGrid();
+          };
+        }
+        grid.appendChild(item);
+      });
+    }
+
+    function showGameOverModal(isWin, message) {
+      const modal = document.getElementById('modal-overlay');
+      const content = document.getElementById('modal-content');
+      modal.classList.remove('hidden');
+
+      if (level > highScore) {
+        highScore = level;
+        localStorage.setItem('neon_bunny_highscore_ultimate', highScore.toString());
+        document.getElementById('high-score-display').innerText = highScore;
+      }
+
+      if (isWin) {
+        let rank = 'S';
+        if (turnCount > 15) rank = 'A';
+        if (turnCount > 25) rank = 'B';
+
+        const rewardGems = isBossLevel ? 35 : 12;
+
+        content.innerHTML = `
+          <div class="text-5xl mb-2">${isBossLevel ? '👑' : '🎉'}</div>
+          <h2 class="font-fredoka text-2xl text-cyan-300 mb-1">${isBossLevel ? 'BOSS CONQUERED!' : 'VICTORY!'}</h2>
+          <p class="text-xs text-slate-300 mb-3">${message}</p>
+          <div class="bg-slate-800/80 p-3 rounded-2xl mb-4 text-xs space-y-1 text-left">
+            <div class="flex justify-between"><span>Performance Rank:</span><span class="font-fredoka text-amber-400 text-base">${rank}</span></div>
+            <div class="flex justify-between"><span>Carrots Bonus:</span><span class="font-bold text-amber-400">+${rewardGems} 🥕</span></div>
+            <div class="flex justify-between"><span>Total Turns:</span><span class="font-bold text-cyan-300">${turnCount}</span></div>
+          </div>
+          <button id="next-level-btn" class="w-full py-2.5 bg-gradient-to-r from-cyan-400 to-emerald-400 hover:from-cyan-300 hover:to-emerald-300 text-slate-950 font-fredoka uppercase text-sm rounded-xl shadow-lg glow-cyan transition">
+            Next Level 🚀
+          </button>
+        `;
+        gems += rewardGems;
+        updateHUD();
+
+        document.getElementById('next-level-btn').onclick = () => {
+          modal.classList.add('hidden');
+          level++;
+          initLevel();
+        };
+      } else {
+        content.innerHTML = `
+          <div class="text-5xl mb-2">💔</div>
+          <h2 class="font-fredoka text-2xl text-rose-400 mb-1">GAME OVER</h2>
+          <p class="text-xs text-slate-300 mb-4">${message}</p>
+          <button id="retry-btn" class="w-full py-2.5 bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-400 hover:to-amber-400 text-white font-fredoka uppercase text-sm rounded-xl shadow-lg transition">
+            Try Again 🔄
+          </button>
+        `;
+        document.getElementById('retry-btn').onclick = () => {
+          modal.classList.add('hidden');
+          hp = maxHp;
+          initLevel();
+        };
+      }
+    }
+
+    /* =========================================================================
+       7. CANVAS GRAPHICS & RENDERING WITH FACE EXPRESSIONS
+       ========================================================================= */
+    function resizeCanvas() {
+      const container = CANVAS.parentElement;
+      const size = Math.min(container.clientWidth, container.clientHeight, 540);
+      CANVAS.width = size; CANVAS.height = size;
+      TILE_SIZE = size / GRID_SIZE;
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+
+    function draw() {
+      CTR.clearRect(0, 0, CANVAS.width, CANVAS.height);
+
+      drawGrid();
+      drawCrumblingAndPits();
+      drawWarpPads();
+      drawIceTiles();
+      drawLaserWarnings();
+      drawPathPreview();
+      drawTraps();
+      drawCollectibles();
+      drawDecoyCarrot();
+      drawMirrorClone();
+      drawKeyAndExit();
+
+      if (isBossLevel && boss && boss.hp > 0) {
+        drawBoss(boss);
+      }
+
+      monsters.forEach(m => drawMonster(m));
+      drawHero(player);
+      updateAndDrawParticles();
+
+      requestAnimationFrame(draw);
+    }
+
+    function drawGrid() {
+      for (let r = 0; r < GRID_SIZE; r++) {
+        for (let c = 0; c < GRID_SIZE; c++) {
+          const x = c * TILE_SIZE, y = r * TILE_SIZE;
+
+          if (mazeWalls[r][c] === 1) {
+            CTR.fillStyle = '#1e293b';
+            CTR.fillRect(x + 2, y + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+            CTR.strokeStyle = isBossLevel ? (boss ? boss.accent : '#f43f5e') : '#38bdf8'; CTR.lineWidth = 2;
+            CTR.strokeRect(x + 4, y + 4, TILE_SIZE - 8, TILE_SIZE - 8);
+          } else if (mazeWalls[r][c] === 2) {
+            CTR.fillStyle = '#020617';
+            CTR.fillRect(x + 1, y + 1, TILE_SIZE - 2, TILE_SIZE - 2);
+            CTR.strokeStyle = '#334155'; CTR.lineWidth = 1;
+            CTR.strokeRect(x + 3, y + 3, TILE_SIZE - 6, TILE_SIZE - 6);
+          } else {
+            CTR.fillStyle = '#0f172a';
+            CTR.fillRect(x + 1, y + 1, TILE_SIZE - 2, TILE_SIZE - 2);
+            CTR.strokeStyle = 'rgba(56, 189, 248, 0.08)';
+            CTR.lineWidth = 1;
+            CTR.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
+          }
+        }
+      }
+    }
+
+    function drawCrumblingAndPits() {
+      crumblingTiles.forEach(t => {
+        const x = t.x * TILE_SIZE, y = t.y * TILE_SIZE;
+        CTR.fillStyle = t.cracked ? '#78350f' : '#b45309';
+        CTR.fillRect(x + 3, y + 3, TILE_SIZE - 6, TILE_SIZE - 6);
+        CTR.strokeStyle = '#f59e0b'; CTR.lineWidth = 1.5;
+        CTR.strokeRect(x + 5, y + 5, TILE_SIZE - 10, TILE_SIZE - 10);
+
+        CTR.fillStyle = '#fde68a';
+        CTR.font = '8px Nunito';
+        CTR.textAlign = 'center';
+        CTR.fillText(t.cracked ? 'Broken' : 'Crumble', x + TILE_SIZE / 2, y + TILE_SIZE - 4);
+      });
+    }
+
+    function drawWarpPads() {
+      const time = performance.now() * 0.003;
+      warpPads.forEach(w => {
+        [ {x: w.x1, y: w.y1}, {x: w.x2, y: w.y2} ].forEach(p => {
+          const cx = p.x * TILE_SIZE + TILE_SIZE / 2;
+          const cy = p.y * TILE_SIZE + TILE_SIZE / 2;
+          CTR.save();
+          CTR.translate(cx, cy);
+          CTR.rotate(time);
+          CTR.strokeStyle = '#a855f7'; CTR.lineWidth = 3;
+          CTR.shadowColor = '#a855f7'; CTR.shadowBlur = 10;
+          CTR.strokeRect(-TILE_SIZE * 0.22, -TILE_SIZE * 0.22, TILE_SIZE * 0.44, TILE_SIZE * 0.44);
+          CTR.restore();
+
+          CTR.fillStyle = '#d8b4fe';
+          CTR.font = '8px Nunito';
+          CTR.textAlign = 'center';
+          CTR.fillText('Warp', cx, cy + TILE_SIZE * 0.38);
+        });
+      });
+    }
+
+    function drawIceTiles() {
+      iceTiles.forEach(t => {
+        const x = t.x * TILE_SIZE, y = t.y * TILE_SIZE;
+        CTR.fillStyle = 'rgba(56, 189, 248, 0.25)';
+        CTR.fillRect(x + 2, y + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+        CTR.strokeStyle = '#7dd3fc'; CTR.lineWidth = 1.5;
+        CTR.strokeRect(x + 6, y + 6, TILE_SIZE - 12, TILE_SIZE - 12);
+
+        CTR.fillStyle = '#7dd3fc';
+        CTR.font = '8px Nunito';
+        CTR.textAlign = 'center';
+        CTR.fillText('Ice Slide', x + TILE_SIZE / 2, y + TILE_SIZE - 5);
+      });
+    }
+
+    function drawLaserWarnings() {
+      laserWarnings.forEach(warn => {
+        CTR.fillStyle = boss ? boss.accent + '55' : 'rgba(244, 63, 94, 0.35)';
+        if (warn.type === 'row') {
+          CTR.fillRect(0, warn.index * TILE_SIZE, CANVAS.width, TILE_SIZE);
+        } else if (warn.type === 'col') {
+          CTR.fillRect(warn.index * TILE_SIZE, 0, TILE_SIZE, CANVAS.height);
+        }
+      });
+    }
+
+    function drawPathPreview() {
+      if (plannedQueue.length === 0) return;
+
+      CTR.save();
+      let currX = player.x, currY = player.y;
+
+      CTR.beginPath();
+      CTR.moveTo(currX * TILE_SIZE + TILE_SIZE / 2, currY * TILE_SIZE + TILE_SIZE / 2);
+
+      plannedQueue.forEach(card => {
+        if (card.type !== 'power') {
+          currX += card.dx; currY += card.dy;
+          CTR.lineTo(currX * TILE_SIZE + TILE_SIZE / 2, currY * TILE_SIZE + TILE_SIZE / 2);
+        }
+      });
+
+      CTR.strokeStyle = 'rgba(56, 189, 248, 0.7)';
+      CTR.lineWidth = 4;
+      CTR.setLineDash([6, 6]);
+      CTR.stroke();
+
+      CTR.fillStyle = 'rgba(56, 189, 248, 0.3)';
+      CTR.beginPath();
+      CTR.arc(currX * TILE_SIZE + TILE_SIZE / 2, currY * TILE_SIZE + TILE_SIZE / 2, TILE_SIZE * 0.28, 0, Math.PI * 2);
+      CTR.fill();
+      CTR.restore();
+    }
+
+    function drawHero(p) {
+      const time = performance.now() * 0.005;
+      const bobY = Math.sin(time * 2) * (TILE_SIZE * 0.04);
+
+      const cx = p.animX * TILE_SIZE + TILE_SIZE / 2;
+      const cy = p.animY * TILE_SIZE + TILE_SIZE / 2 + bobY;
+      const radius = TILE_SIZE * 0.31;
+
+      CTR.save();
+      CTR.translate(cx, cy);
+
+      if (hasShield) {
+        CTR.strokeStyle = '#38bdf8';
+        CTR.lineWidth = 3;
+        CTR.shadowColor = '#38bdf8';
+        CTR.shadowBlur = 15;
+        CTR.beginPath();
+        CTR.arc(0, 0, radius * 1.3, 0, Math.PI * 2);
+        CTR.stroke();
+      }
+
+      if (plasmaTurns > 0) {
+        CTR.strokeStyle = '#38bdf8';
+        CTR.lineWidth = 2.5;
+        CTR.shadowColor = '#00e5ff';
+        CTR.shadowBlur = 20;
+        CTR.beginPath();
+        CTR.arc(0, 0, radius * 1.5, 0, Math.PI * 2);
+        CTR.stroke();
+      }
+
+      CTR.shadowColor = activeSkin.color;
+      CTR.shadowBlur = 18;
+
+      CTR.fillStyle = activeSkin.color;
+      CTR.beginPath();
+      CTR.arc(0, 0, radius, 0, Math.PI * 2);
+      CTR.fill();
+
+      // Ears / Features based on skin type
+      if (activeSkin.type === 'bunny') {
+        CTR.beginPath();
+        CTR.ellipse(-radius * 0.45, -radius * 1.1, radius * 0.28, radius * 0.65, -0.15, 0, Math.PI * 2);
+        CTR.ellipse(radius * 0.45, -radius * 1.1, radius * 0.28, radius * 0.65, 0.15, 0, Math.PI * 2);
+        CTR.fill();
+        CTR.fillStyle = activeSkin.earInner;
+        CTR.beginPath();
+        CTR.ellipse(-radius * 0.45, -radius * 1.1, radius * 0.12, radius * 0.4, -0.15, 0, Math.PI * 2);
+        CTR.ellipse(radius * 0.45, -radius * 1.1, radius * 0.12, radius * 0.4, 0.15, 0, Math.PI * 2);
+        CTR.fill();
+      } else if (['cat', 'fox', 'owl'].includes(activeSkin.type)) {
+        CTR.beginPath();
+        CTR.moveTo(-radius * 0.7, -radius * 0.5);
+        CTR.lineTo(-radius * 0.9, -radius * 1.1);
+        CTR.lineTo(-radius * 0.2, -radius * 0.7);
+        CTR.moveTo(radius * 0.7, -radius * 0.5);
+        CTR.lineTo(radius * 0.9, -radius * 1.1);
+        CTR.lineTo(radius * 0.2, -radius * 0.7);
+        CTR.fill();
+        CTR.fillStyle = activeSkin.earInner;
+        CTR.beginPath();
+        CTR.moveTo(-radius * 0.6, -radius * 0.6);
+        CTR.lineTo(-radius * 0.75, -radius * 0.95);
+        CTR.lineTo(-radius * 0.3, -radius * 0.75);
+        CTR.moveTo(radius * 0.6, -radius * 0.6);
+        CTR.lineTo(radius * 0.75, -radius * 0.95);
+        CTR.lineTo(radius * 0.3, -radius * 0.75);
+        CTR.fill();
+      } else if (['bear', 'koala', 'panda', 'mouse'].includes(activeSkin.type)) {
+        CTR.beginPath();
+        CTR.arc(-radius * 0.7, -radius * 0.7, radius * 0.32, 0, Math.PI * 2);
+        CTR.arc(radius * 0.7, -radius * 0.7, radius * 0.32, 0, Math.PI * 2);
+        CTR.fill();
+        CTR.fillStyle = activeSkin.earInner;
+        CTR.beginPath();
+        CTR.arc(-radius * 0.7, -radius * 0.7, radius * 0.16, 0, Math.PI * 2);
+        CTR.arc(radius * 0.7, -radius * 0.7, radius * 0.16, 0, Math.PI * 2);
+        CTR.fill();
+      } else if (['dog', 'lion', 'tiger'].includes(activeSkin.type)) {
+        CTR.beginPath();
+        CTR.ellipse(-radius * 0.75, -radius * 0.4, radius * 0.25, radius * 0.45, 0.3, 0, Math.PI * 2);
+        CTR.ellipse(radius * 0.75, -radius * 0.4, radius * 0.25, radius * 0.45, -0.3, 0, Math.PI * 2);
+        CTR.fill();
+      } else {
+        CTR.beginPath();
+        CTR.arc(-radius * 0.4, -radius * 0.9, radius * 0.22, 0, Math.PI * 2);
+        CTR.arc(radius * 0.4, -radius * 0.9, radius * 0.22, 0, Math.PI * 2);
+        CTR.fill();
+      }
+
+      // Face Base
+      CTR.fillStyle = '#f8fafc';
+      CTR.beginPath();
+      CTR.ellipse(0, radius * 0.05, radius * 0.72, radius * 0.65, 0, 0, Math.PI * 2);
+      CTR.fill();
+
+      // Dynamic Face Expressions (Blinking / Determined Eyes based on execution state)
+      CTR.fillStyle = '#0f172a';
+      if (isExecuting) {
+        CTR.beginPath();
+        CTR.moveTo(-radius * 0.42, -radius * 0.15); CTR.lineTo(-radius * 0.12, -radius * 0.05); CTR.lineTo(-radius * 0.42, 0);
+        CTR.moveTo(radius * 0.42, -radius * 0.15); CTR.lineTo(radius * 0.12, -radius * 0.05); CTR.lineTo(radius * 0.42, 0);
+        CTR.fill();
+      } else {
+        CTR.beginPath();
+        CTR.arc(-radius * 0.28, -radius * 0.05, radius * 0.18, 0, Math.PI * 2);
+        CTR.arc(radius * 0.28, -radius * 0.05, radius * 0.18, 0, Math.PI * 2);
+        CTR.fill();
+
+        CTR.fillStyle = '#ffffff';
+        CTR.beginPath();
+        CTR.arc(-radius * 0.32, -radius * 0.1, radius * 0.07, 0, Math.PI * 2);
+        CTR.arc(radius * 0.24, -radius * 0.1, radius * 0.07, 0, Math.PI * 2);
+        CTR.fill();
+      }
+
+      CTR.fillStyle = activeSkin.blush;
+      CTR.globalAlpha = 0.6;
+      CTR.beginPath();
+      CTR.arc(-radius * 0.42, radius * 0.2, radius * 0.1, 0, Math.PI * 2);
+      CTR.arc(radius * 0.42, radius * 0.2, radius * 0.1, 0, Math.PI * 2);
+      CTR.fill();
+      CTR.globalAlpha = 1.0;
+
+      CTR.restore();
+
+      CTR.fillStyle = '#38bdf8';
+      CTR.font = 'bold 10px Nunito';
+      CTR.textAlign = 'center';
+      CTR.fillText(`🐾 ${activeSkin.name}`, cx, cy - TILE_SIZE * 0.42);
+    }
+
+    function drawBoss(b) {
+      const cx = b.animX * TILE_SIZE + TILE_SIZE / 2;
+      const cy = b.animY * TILE_SIZE + TILE_SIZE / 2;
+      const radius = TILE_SIZE * 0.75; 
+
+      CTR.save();
+      CTR.translate(cx, cy);
+
+      CTR.shadowColor = b.accent;
+      CTR.shadowBlur = 25;
+
+      CTR.fillStyle = b.color;
+      CTR.beginPath();
+      CTR.arc(0, 0, radius, 0, Math.PI * 2);
+      CTR.fill();
+
+      CTR.fillStyle = b.accent;
+      CTR.beginPath();
+      if (b.bossId % 3 === 0) {
+        CTR.moveTo(-radius * 0.6, -radius * 0.6);
+        CTR.lineTo(-radius * 0.9, -radius * 1.2);
+        CTR.lineTo(-radius * 0.2, -radius * 0.8);
+        CTR.moveTo(radius * 0.6, -radius * 0.6);
+        CTR.lineTo(radius * 0.9, -radius * 1.2);
+        CTR.lineTo(radius * 0.2, -radius * 0.8);
+      } else if (b.bossId % 3 === 1) {
+        CTR.moveTo(-radius * 0.5, -radius * 0.8);
+        CTR.lineTo(-radius * 0.5, -radius * 1.3);
+        CTR.lineTo(-radius * 0.25, -radius * 0.9);
+        CTR.lineTo(0, -radius * 1.4);
+        CTR.lineTo(radius * 0.25, -radius * 0.9);
+        CTR.lineTo(radius * 0.5, -radius * 1.3);
+        CTR.lineTo(radius * 0.5, -radius * 0.8);
+      } else {
+        CTR.ellipse(0, -radius * 1.0, radius * 0.7, radius * 0.2, 0, 0, Math.PI * 2);
+      }
+      CTR.fill();
+
+      CTR.fillStyle = '#ffffff';
+      CTR.beginPath();
+      CTR.arc(-radius * 0.35, -radius * 0.1, radius * 0.2, 0, Math.PI * 2);
+      CTR.arc(radius * 0.35, -radius * 0.1, radius * 0.2, 0, Math.PI * 2);
+      CTR.fill();
+
+      CTR.fillStyle = b.accent;
+      CTR.beginPath();
+      CTR.arc(-radius * 0.35, -radius * 0.1, radius * 0.09, 0, Math.PI * 2);
+      CTR.arc(radius * 0.35, -radius * 0.1, radius * 0.09, 0, Math.PI * 2);
+      CTR.fill();
+
+      CTR.restore();
+
+      CTR.fillStyle = b.accent;
+      CTR.font = 'bold 11px Fredoka';
+      CTR.textAlign = 'center';
+      CTR.fillText(`👑 ${b.title}`, cx, cy - TILE_SIZE * 0.82);
+    }
+
+    function drawMonster(m) {
+      const cx = m.animX * TILE_SIZE + TILE_SIZE / 2;
+      const cy = m.animY * TILE_SIZE + TILE_SIZE / 2;
+      const radius = TILE_SIZE * 0.36;
+
+      CTR.save();
+      CTR.translate(cx, cy);
+
+      const isFrozen = freezeTurns > 0;
+      CTR.shadowColor = isFrozen ? '#38bdf8' : m.type === 'chaser' ? '#a855f7' : m.type === 'blink' ? '#ec4899' : '#dc2626';
+      CTR.shadowBlur = 20;
+
+      CTR.fillStyle = isFrozen ? '#1e3a8a' : m.type === 'chaser' ? '#581c87' : m.type === 'blink' ? '#831843' : '#4c1d95';
+      CTR.beginPath();
+      CTR.arc(0, 0, radius, 0, Math.PI * 2);
+      CTR.fill();
+
+      CTR.fillStyle = isFrozen ? '#3b82f6' : '#3b0764';
+      CTR.beginPath();
+      CTR.moveTo(-radius * 0.6, -radius * 0.2);
+      CTR.lineTo(-radius * 0.8, -radius * 1.2);
+      CTR.lineTo(-radius * 0.1, -radius * 0.6);
+      CTR.fill();
+
+      CTR.beginPath();
+      CTR.moveTo(radius * 0.6, -radius * 0.2);
+      CTR.lineTo(radius * 0.8, -radius * 1.2);
+      CTR.lineTo(radius * 0.1, -radius * 0.6);
+      CTR.fill();
+
+      CTR.fillStyle = isFrozen ? '#93c5fd' : '#f43f5e';
+      CTR.beginPath();
+      CTR.ellipse(-radius * 0.28, -radius * 0.1, radius * 0.15, radius * 0.2, 0.2, 0, Math.PI * 2);
+      CTR.ellipse(radius * 0.28, -radius * 0.1, radius * 0.15, radius * 0.2, -0.2, 0, Math.PI * 2);
+      CTR.fill();
+
+      CTR.restore();
+
+      CTR.fillStyle = m.type === 'chaser' ? '#c084fc' : m.type === 'blink' ? '#f472b6' : '#f87171';
+      CTR.font = 'bold 9px Nunito';
+      CTR.textAlign = 'center';
+      CTR.fillText(`👾 ${m.type.toUpperCase()}`, cx, cy - TILE_SIZE * 0.42);
+    }
+
+    function drawTraps() {
+      traps.forEach(t => {
+        const cx = t.x * TILE_SIZE + TILE_SIZE / 2;
+        const cy = t.y * TILE_SIZE + TILE_SIZE / 2;
+
+        CTR.save();
+        if (t.type === 'spikes') {
+          CTR.fillStyle = '#94a3b8';
+          const size = TILE_SIZE * 0.22;
+          for (let i = -1; i <= 1; i += 2) {
+            for (let j = -1; j <= 1; j += 2) {
+              CTR.beginPath();
+              CTR.moveTo(cx + i * size, cy + j * size - 6);
+              CTR.lineTo(cx + i * size + 5, cy + j * size + 6);
+              CTR.lineTo(cx + i * size - 5, cy + j * size + 6);
+              CTR.fill();
+            }
+          }
+        } else if (t.type === 'lava') {
+          CTR.shadowColor = '#ea580c'; CTR.shadowBlur = 12;
+          CTR.fillStyle = '#ea580c';
+          CTR.beginPath(); CTR.arc(cx, cy, TILE_SIZE * 0.28, 0, Math.PI * 2); CTR.fill();
+          CTR.fillStyle = '#fef08a';
+          CTR.beginPath(); CTR.arc(cx, cy, TILE_SIZE * 0.14, 0, Math.PI * 2); CTR.fill();
+        } else if (t.type === 'crush') {
+          CTR.shadowColor = '#64748b'; CTR.shadowBlur = 8;
+          CTR.fillStyle = '#334155';
+          CTR.fillRect(cx - TILE_SIZE * 0.3, cy - TILE_SIZE * 0.3, TILE_SIZE * 0.6, TILE_SIZE * 0.6);
+          CTR.strokeStyle = '#94a3b8'; CTR.lineWidth = 2;
+          CTR.strokeRect(cx - TILE_SIZE * 0.25, cy - TILE_SIZE * 0.25, TILE_SIZE * 0.5, TILE_SIZE * 0.5);
+        } else if (t.type === 'teleport') {
+          CTR.shadowColor = '#a855f7'; CTR.shadowBlur = 10;
+          CTR.fillStyle = '#581c87';
+          CTR.beginPath(); CTR.arc(cx, cy, TILE_SIZE * 0.25, 0, Math.PI * 2); CTR.fill();
+          CTR.strokeStyle = '#c084fc'; CTR.lineWidth = 2;
+          CTR.stroke();
+        }
+        CTR.restore();
+
+        CTR.fillStyle = '#fb923c';
+        CTR.font = '8px Nunito';
+        CTR.textAlign = 'center';
+        CTR.fillText(t.type === 'spikes' ? 'Spikes' : t.type === 'lava' ? 'Lava' : t.type === 'crush' ? 'Crush' : 'Portal', cx, cy + TILE_SIZE * 0.38);
+      });
+    }
+
+    function drawDecoyCarrot() {
+      if (!decoyCarrot) return;
+      const cx = decoyCarrot.x * TILE_SIZE + TILE_SIZE / 2;
+      const cy = decoyCarrot.y * TILE_SIZE + TILE_SIZE / 2;
+
+      CTR.save();
+      CTR.shadowColor = '#f59e0b'; CTR.shadowBlur = 18;
+      CTR.fillStyle = '#f97316';
+      CTR.beginPath();
+      CTR.ellipse(cx, cy, TILE_SIZE * 0.16, TILE_SIZE * 0.28, 0, 0, Math.PI * 2);
+      CTR.fill();
+      CTR.restore();
+
+      CTR.fillStyle = '#f59e0b';
+      CTR.font = '8px Nunito';
+      CTR.textAlign = 'center';
+      CTR.fillText('Decoy', cx, cy + TILE_SIZE * 0.38);
+    }
+
+    function drawMirrorClone() {
+      if (!mirrorClone) return;
+      const cx = mirrorClone.x * TILE_SIZE + TILE_SIZE / 2;
+      const cy = mirrorClone.y * TILE_SIZE + TILE_SIZE / 2;
+      const radius = TILE_SIZE * 0.31;
+
+      CTR.save();
+      CTR.globalAlpha = 0.65;
+      CTR.shadowColor = '#c084fc';
+      CTR.shadowBlur = 15;
+      CTR.fillStyle = activeSkin.color;
+      CTR.beginPath();
+      CTR.arc(cx, cy, radius, 0, Math.PI * 2);
+      CTR.fill();
+      CTR.restore();
+
+      CTR.fillStyle = '#c084fc';
+      CTR.font = '8px Nunito';
+      CTR.textAlign = 'center';
+      CTR.fillText('Clone', cx, cy + TILE_SIZE * 0.38);
+    }
+
+    function drawCollectibles() {
+      const time = performance.now() * 0.004;
+      collectibles.forEach(g => {
+        const cx = g.x * TILE_SIZE + TILE_SIZE / 2;
+        const cy = g.y * TILE_SIZE + TILE_SIZE / 2 + Math.sin(time + g.x) * 4;
+
+        CTR.save();
+        CTR.shadowColor = '#fbbf24'; CTR.shadowBlur = 12;
+        CTR.fillStyle = '#f97316';
+        CTR.beginPath();
+        CTR.ellipse(cx, cy, TILE_SIZE * 0.13, TILE_SIZE * 0.24, 0.2, 0, Math.PI * 2);
+        CTR.fill();
+
+        CTR.fillStyle = '#22c55e';
+        CTR.beginPath();
+        CTR.arc(cx - 3, cy - TILE_SIZE * 0.2, 4, 0, Math.PI * 2);
+        CTR.arc(cx + 3, cy - TILE_SIZE * 0.2, 4, 0, Math.PI * 2);
+        CTR.fill();
+        CTR.restore();
+
+        CTR.fillStyle = '#fbbf24';
+        CTR.font = '8px Nunito';
+        CTR.textAlign = 'center';
+        CTR.fillText('Carrot', cx, cy + TILE_SIZE * 0.38);
+      });
+    }
+
+    function drawKeyAndExit() {
+      const time = performance.now() * 0.003;
+
+      if (keyPos && !keyCollected) {
+        const kx = keyPos.x * TILE_SIZE + TILE_SIZE / 2;
+        const ky = keyPos.y * TILE_SIZE + TILE_SIZE / 2 + Math.sin(time * 2) * 3;
+
+        CTR.save();
+        CTR.shadowColor = '#f59e0b'; CTR.shadowBlur = 15;
+        CTR.strokeStyle = '#f59e0b'; CTR.lineWidth = 3;
+        CTR.beginPath();
+        CTR.arc(kx, ky - 6, TILE_SIZE * 0.12, 0, Math.PI * 2);
+        CTR.moveTo(kx, ky); CTR.lineTo(kx, ky + 12);
+        CTR.lineTo(kx + 5, ky + 12);
+        CTR.stroke();
+        CTR.restore();
+
+        CTR.fillStyle = '#f59e0b';
+        CTR.font = 'bold 9px Nunito';
+        CTR.textAlign = 'center';
+        CTR.fillText('🔑 Key', kx, ky - TILE_SIZE * 0.35);
+      }
+
+      const ex = exitPos.x * TILE_SIZE + TILE_SIZE / 2;
+      const ey = exitPos.y * TILE_SIZE + TILE_SIZE / 2;
+
+      CTR.save();
+      CTR.translate(ex, ey);
+      CTR.rotate(time);
+
+      if (!keyCollected || (isBossLevel && boss && boss.hp > 0)) {
+        CTR.shadowColor = '#f43f5e'; CTR.shadowBlur = 15;
+        CTR.strokeStyle = '#f43f5e'; CTR.lineWidth = 4;
+        CTR.strokeRect(-TILE_SIZE * 0.25, -TILE_SIZE * 0.25, TILE_SIZE * 0.5, TILE_SIZE * 0.5);
+      } else {
+        CTR.shadowColor = '#a855f7'; CTR.shadowBlur = 20;
+        const grad = CTR.createConicGradient(0, 0, 0);
+        grad.addColorStop(0, '#38bdf8'); grad.addColorStop(0.5, '#ec4899'); grad.addColorStop(1, '#38bdf8');
+        CTR.strokeStyle = grad; CTR.lineWidth = 5;
+
+        CTR.beginPath();
+        for (let i = 0; i < 5; i++) {
+          const angle = (i * 4 * Math.PI) / 5;
+          const r = TILE_SIZE * 0.34;
+          const x = r * Math.cos(angle), y = r * Math.sin(angle);
+          if (i === 0) CTR.moveTo(x, y); else CTR.lineTo(x, y);
+        }
+        CTR.closePath(); CTR.stroke();
+      }
+
+      CTR.restore();
+
+      CTR.fillStyle = '#a855f7';
+      CTR.font = 'bold 9px Nunito';
+      CTR.textAlign = 'center';
+      CTR.fillText('🌀 Portal', ex, ey - TILE_SIZE * 0.42);
+    }
+
+    /* =========================================================================
+       8. PARTICLE EFFECTS
+       ========================================================================= */
+    function addParticles(gx, gy, count, color) {
+      const cx = gx * TILE_SIZE + TILE_SIZE / 2;
+      const cy = gy * TILE_SIZE + TILE_SIZE / 2;
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: cx, y: cy,
+          vx: (Math.random() - 0.5) * 5,
+          vy: (Math.random() - 0.5) * 5,
+          life: 1.0, color
+        });
+      }
+    }
+
+    function updateAndDrawParticles() {
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx; p.y += p.vy; p.life -= 0.04;
+
+        if (p.life <= 0) {
+          particles.splice(i, 1);
+          continue;
+        }
+
+        CTR.fillStyle = p.color;
+        CTR.globalAlpha = p.life;
+        CTR.beginPath();
+        CTR.arc(p.x, p.y, 3 * p.life, 0, Math.PI * 2);
+        CTR.fill();
+        CTR.globalAlpha = 1.0;
+      }
+    }
+
+    /* =========================================================================
+       9. BOOTSTRAP
+       ========================================================================= */
+    window.onload = () => {
+      initLevel();
+      requestAnimationFrame(draw);
+    };
+  </script>
+</body>
+</html>
