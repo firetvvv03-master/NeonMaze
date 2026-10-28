@@ -85,7 +85,7 @@
       <div class="flex items-center space-x-2 sm:space-x-5">
         <div class="flex items-center space-x-1" title="Health Points">
           <span class="text-lg sm:text-xl">❤️</span>
-          <span id="hp-display" class="font-fredoka text-lg sm:text-xl text-rose-400">3/3</span>
+          <span id="hp-display" class="font-fredoka text-lg sm:text-xl text-rose-400">3/5</span>
         </div>
         <div class="flex items-center space-x-1" title="Carrots (Currency)">
           <span class="text-lg sm:text-xl">🥕</span>
@@ -161,7 +161,7 @@
     <!-- Side Power-Up Panel -->
     <aside class="w-40 sm:w-48 bg-slate-900/90 backdrop-blur-md border border-amber-500/40 rounded-2xl p-2.5 flex flex-col shrink-0 h-full max-h-[560px] shadow-xl">
       <div class="text-center pb-2 mb-2 border-b border-amber-500/30">
-        <h2 class="font-fredoka text-xs sm:text-sm text-amber-400 tracking-wide">⚡ POWER-UPS</h2>
+        <h2 class="font-fredoka text-xs sm:text-sm text-amber-400 tracking-wide">⚡ POWER-UPS & LEAPS</h2>
         <p class="text-[9px] text-slate-400">Click or hover for info</p>
       </div>
       <div id="powerup-deck-container" class="flex-1 overflow-y-auto space-y-2 pr-0.5 mb-2">
@@ -206,7 +206,7 @@
       <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider px-1 flex justify-between">
         <span>Movement Hand</span>
       </div>
-      <div class="grid grid-cols-8 gap-1.5 sm:gap-2 w-full" id="deck-container">
+      <div class="grid grid-cols-6 sm:grid-cols-7 gap-1.5 sm:gap-2 w-full" id="deck-container">
         <!-- Generated via JS -->
       </div>
     </div>
@@ -224,12 +224,12 @@
 
       <div class="overflow-y-auto space-y-4 pr-1 flex-1">
         <div>
-          <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Power Upgrades</h3>
+          <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Power Upgrades (Max HP: 5)</h3>
           <div class="space-y-2">
             <div class="bg-slate-800/80 p-3 rounded-2xl border border-slate-700 flex justify-between items-center">
               <div>
                 <p class="font-bold text-sm text-cyan-200">Extra Heart (+1 Max HP)</p>
-                <p class="text-[11px] text-slate-400">Increase maximum health pool</p>
+                <p class="text-[11px] text-slate-400">Increase maximum health pool (Up to 5)</p>
               </div>
               <button id="buy-hp-btn" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-xl shadow transition shrink-0">
                 🥕 <span id="cost-hp">30</span>
@@ -294,8 +294,8 @@
     let GRID_SIZE = 9;
     let TILE_SIZE = 64;
 
-    let maxHp = 3;
-    let hp = 3;
+    let maxHp = 5;
+    let hp = 5;
     let gems = 0;
     let level = 1;
     let turnCount = 1;
@@ -314,9 +314,9 @@
     let highScore = parseInt(localStorage.getItem('neon_bunny_highscore_ultimate') || '1');
     document.getElementById('high-score-display').innerText = highScore;
 
-    // 30 Total Free Skins organized into 3 Categories with 10 Styles each[cite: 9]
+    // 30 Total Free Skins organized into 3 Categories with 10 Styles each
     const SKINS = [
-      // CATEGORY 1: BUNNIES (10 Styles)[cite: 9]
+      // CATEGORY 1: BUNNIES (10 Styles)
       { id: 'cyan', name: 'Neon Cyan Bunny', category: 'bunny', type: 'bunny', color: '#00e5ff', earInner: '#a5f3fc', blush: '#38bdf8', unlocked: true },
       { id: 'pink', name: 'Cyber Pink Bunny', category: 'bunny', type: 'bunny', color: '#ec4899', earInner: '#fbcfe8', blush: '#f43f5e', unlocked: true },
       { id: 'gold', name: 'Golden Bunny', category: 'bunny', type: 'bunny', color: '#f59e0b', earInner: '#fef08a', blush: '#fbbf24', unlocked: true },
@@ -328,7 +328,7 @@
       { id: 'ruby', name: 'Ruby Heart', category: 'bunny', type: 'bunny', color: '#e11d48', earInner: '#ffe4e6', blush: '#be123c', unlocked: true },
       { id: 'galaxy', name: 'Cosmic Galaxy', category: 'bunny', type: 'bunny', color: '#6366f1', earInner: '#e0e7ff', blush: '#4f46e5', unlocked: true },
 
-      // CATEGORY 2: CAT & FRIENDS (10 Styles)[cite: 9]
+      // CATEGORY 2: CAT & FRIENDS (10 Styles)
       { id: 'cat_kitty', name: 'Neon Kitty', category: 'cat_friends', type: 'cat', color: '#fb7185', earInner: '#fbcfe8', blush: '#f43f5e', unlocked: true },
       { id: 'dog_puppy', name: 'Sparkle Puppy', category: 'cat_friends', type: 'dog', color: '#a16207', earInner: '#fef08a', blush: '#ca8a04', unlocked: true },
       { id: 'hamster_cheek', name: 'Chubby Hamster', category: 'cat_friends', type: 'hamster', color: '#fb923c', earInner: '#ffedd5', blush: '#f97316', unlocked: true },
@@ -340,7 +340,7 @@
       { id: 'owl_wise', name: 'Neon Owl', category: 'cat_friends', type: 'owl', color: '#8b5cf6', earInner: '#ede9fe', blush: '#7c3aed', unlocked: true },
       { id: 'mouse_squeak', name: 'Pico Mouse', category: 'cat_friends', type: 'mouse', color: '#cbd5e1', earInner: '#f8fafc', blush: '#94a3b8', unlocked: true },
 
-      // CATEGORY 3: WILD & FOREST (10 Styles)[cite: 9]
+      // CATEGORY 3: WILD & FOREST (10 Styles)
       { id: 'bear_teddy', name: 'Honey Bear', category: 'wild', type: 'bear', color: '#d97706', earInner: '#fde68a', blush: '#b45309', unlocked: true },
       { id: 'panda_bamboo', name: 'Cyber Panda', category: 'wild', type: 'panda', color: '#334155', earInner: '#cbd5e1', blush: '#64748b', unlocked: true },
       { id: 'koala_eucaly', name: 'Dreamy Koala', category: 'wild', type: 'koala', color: '#64748b', earInner: '#cbd5e1', blush: '#475569', unlocked: true },
@@ -355,7 +355,7 @@
     let activeSkin = SKINS[0];
     let activeSkinCategory = 'bunny';
 
-    // 20 Unique Boss Data Catalog[cite: 9]
+    // 20 Unique Boss Data Catalog
     const BOSS_CATALOG = [
       { name: "The Shadow King", color: "#881337", accent: "#f43f5e" },
       { name: "Inferno Baron", color: "#7c2d12", accent: "#f97316" },
@@ -396,35 +396,37 @@
     let powerupDeck = [];
     let plannedQueue = [];
 
+    // Standard movement cards (Up, Down, Left, Right)
     const MOVEMENT_CARDS = [
       { id: 'UP', label: 'Up 1', icon: '⬆️', dx: 0, dy: -1, type: 'move' },
       { id: 'DOWN', label: 'Down 1', icon: '⬇️', dx: 0, dy: 1, type: 'move' },
       { id: 'LEFT', label: 'Left 1', icon: '⬅️', dx: -1, dy: 0, type: 'move' },
-      { id: 'RIGHT', label: 'Right 1', icon: '➡️', dx: 1, dy: 0, type: 'move' },
-      { id: 'JUMP_UP', label: 'Leap Up', icon: '🐰⬆️', dx: 0, dy: -2, type: 'jump' },
-      { id: 'JUMP_DOWN', label: 'Leap Down', icon: '🐰⬇️', dx: 0, dy: 2, type: 'jump' },
-      { id: 'JUMP_LEFT', label: 'Leap Left', icon: '🐰⬅️', dx: -2, dy: 0, type: 'jump' },
-      { id: 'JUMP_RIGHT', label: 'Leap Right', icon: '🐰➡️', dx: 2, dy: 0, type: 'jump' }
+      { id: 'RIGHT', label: 'Right 1', icon: '➡️', dx: 1, dy: 0, type: 'move' }
+    ];
+
+    // Leap Cards
+    const LEAP_CARDS = [
+      { id: 'JUMP_UP', label: 'Leap Up', icon: '🐰⬆️', dx: 0, dy: -2, type: 'jump', desc: 'Leap Up: Jump 2 tiles forward vertically over obstacles.' },
+      { id: 'JUMP_DOWN', label: 'Leap Down', icon: '🐰⬇️', dx: 0, dy: 2, type: 'jump', desc: 'Leap Down: Jump 2 tiles backward vertically over obstacles.' },
+      { id: 'JUMP_LEFT', label: 'Leap Left', icon: '🐰⬅️', dx: -2, dy: 0, type: 'jump', desc: 'Leap Left: Jump 2 tiles left horizontally over obstacles.' },
+      { id: 'JUMP_RIGHT', label: 'Leap Right', icon: '🐰➡️', dx: 2, dy: 0, type: 'jump', desc: 'Leap Right: Jump 2 tiles right horizontally over obstacles.' }
     ];
 
     const POWER_CARDS = [
       { id: 'SHIELD', label: 'Shield', icon: '🛡️', type: 'power', effect: 'shield', desc: 'Shield: Protects you from the next damage instance.' },
       { id: 'TELEPORT', label: 'Teleport', icon: '🌀', type: 'power', effect: 'teleport', desc: 'Teleport: Instantly teleports you to a random safe tile.' },
       { id: 'FREEZE', label: 'Freeze', icon: '❄️', type: 'power', effect: 'freeze', desc: 'Freeze: Freezes all monsters in place for 2 turns.' },
-      { id: 'BOMB', label: 'Bomb', icon: '💣', type: 'power', effect: 'bomb', desc: 'Bomb: Destroys adjacent walls and damages nearby enemies.' },
+      { id: 'BOMB', label: 'Bomb (2x2)', icon: '💣', type: 'power', effect: 'bomb', desc: 'Bomb: Blasts a 2x2 area of walls and damages nearby enemies.' },
       { id: 'DECOY', label: 'Decoy', icon: '🥕✨', type: 'power', effect: 'decoy', desc: 'Decoy: Drops a carrot decoy to distract chasing monsters.' },
       { id: 'LASER', label: 'Lightning', icon: '⚡', type: 'power', effect: 'laser', desc: 'Lightning: Fires a laser row and column beam clearing threats.' },
-      { id: 'GRAPPLE', label: 'Grapple', icon: '🪝', type: 'power', effect: 'grapple', desc: 'Grapple: Pulls you forward 3 tiles instantly.' },
       { id: 'MAGNET', label: 'Magnet', icon: '🧲', type: 'power', effect: 'magnet', desc: 'Magnet: Instantly collects all map gems and keys.' },
       { id: 'HEAL', label: 'Heal', icon: '💖', type: 'power', effect: 'heal', desc: 'Heal: Restores 1 health point.' },
-      { id: 'CLUSTER', label: 'Cluster Bomb', icon: '💣💥', type: 'power', effect: 'cluster', desc: 'Cluster Bomb: Blasts a 3x3 area of walls and enemies.' },
-      { id: 'SLOW', label: 'Time Slow', icon: '⏳', type: 'power', effect: 'slow', desc: 'Time Slow: Slows enemy turns for 4 rounds.' },
+      { id: 'CLUSTER', label: 'Cluster Bomb (4x4)', icon: '💣💥', type: 'power', effect: 'cluster', desc: 'Cluster Bomb: Blasts a 4x4 area of walls and enemies.' },
       { id: 'PHASE', label: 'Phase Shift', icon: '👻', type: 'power', effect: 'phase', desc: 'Phase Shift: Makes adjacent walls passable and gives shield.' },
       { id: 'BOOMERANG', label: 'Boomerang', icon: '🪃', type: 'power', effect: 'boomerang', desc: 'Boomerang: Attacks the closest enemy or boss.' },
       { id: 'TORNADO', label: 'Tornado', icon: '🌪️', type: 'power', effect: 'tornado', desc: 'Tornado: Randomly scatters all monsters across the maze.' },
-      { id: 'FLASHBANG', label: 'Flashbang', icon: '🌟', type: 'power', effect: 'flash', desc: 'Flashbang: Stuns and blinds all monsters temporarily.' },
       { id: 'MIRROR', label: 'Mirror Image', icon: '👥', type: 'power', effect: 'mirror', desc: 'Mirror Image: Spawns a glowing clone to distract enemies for 3 turns.' },
-      { id: 'PLASMA', label: 'Plasma Aura', icon: '💠', type: 'power', effect: 'plasma', desc: 'Plasma Aura: Surrounds you with plasma that zaps nearby touching monsters.' }
+      { id: 'PLASMA', label: 'Plasma Aura', icon: '💠', type: 'power', effect: 'plasma', desc: 'Plasma Aura: Deals 1 damage to all monsters and bosses on the screen.' }
     ];
 
     let particles = [];
@@ -742,6 +744,14 @@
         const pt = openTiles.pop();
         const randType = Math.random();
         let mType = 'patrol';
+        let isElite = false;
+        let hpVal = 1;
+
+        if (level >= 3 && Math.random() < 0.25) {
+          isElite = true;
+          hpVal = 2;
+        }
+
         if (randType > 0.6) mType = 'chaser';
         else if (randType > 0.35) mType = 'blink';
 
@@ -749,6 +759,8 @@
           x: pt.x, y: pt.y,
           animX: pt.x, animY: pt.y,
           type: mType,
+          isElite: isElite,
+          hp: hpVal,
           dir: Math.random() > 0.5 ? 1 : -1,
           axis: Math.random() > 0.5 ? 'X' : 'Y'
         });
@@ -759,7 +771,8 @@
       movementDeck = [];
       powerupDeck = [];
 
-      for (let i = 0; i < 8; i++) {
+      const moveCount = Math.random() < 0.5 ? 6 : 7;
+      for (let i = 0; i < moveCount; i++) {
         const cardType = MOVEMENT_CARDS[Math.floor(Math.random() * MOVEMENT_CARDS.length)];
         movementDeck.push({ ...cardType, uid: Math.random().toString(36).substring(2, 9), used: false });
       }
@@ -768,6 +781,11 @@
       for (let i = 0; i < powerCount; i++) {
         const cardType = POWER_CARDS[Math.floor(Math.random() * POWER_CARDS.length)];
         powerupDeck.push({ ...cardType, uid: Math.random().toString(36).substring(2, 9), used: false });
+      }
+
+      for (let i = 0; i < 2; i++) {
+        const jumpCard = LEAP_CARDS[Math.floor(Math.random() * LEAP_CARDS.length)];
+        powerupDeck.push({ ...jumpCard, uid: Math.random().toString(36).substring(2, 9), used: false });
       }
 
       renderDeckUI();
@@ -799,11 +817,14 @@
       powerContainer.innerHTML = '';
 
       powerupDeck.forEach((card) => {
+        const isJump = card.type === 'jump';
         const btn = document.createElement('button');
         btn.className = `card-item w-full p-2 rounded-xl flex items-center space-x-2 border transition shadow-md ${
           card.used 
             ? 'opacity-20 border-slate-800 bg-slate-900 pointer-events-none' 
-            : 'bg-amber-950/40 hover:bg-amber-900/60 border-amber-500/60 glow-amber cursor-pointer'
+            : isJump 
+              ? 'bg-cyan-950/40 hover:bg-cyan-900/60 border-cyan-500/60 glow-cyan cursor-pointer'
+              : 'bg-amber-950/40 hover:bg-amber-900/60 border-amber-500/60 glow-amber cursor-pointer'
         }`;
         
         btn.onmouseenter = () => updatePowerupDesc(card.desc);
@@ -816,8 +837,8 @@
         btn.innerHTML = `
           <span class="text-lg">${card.icon}</span>
           <div class="text-left leading-tight">
-            <p class="text-[10px] font-bold text-amber-300">${card.label}</p>
-            <p class="text-[8px] text-slate-400 uppercase">Power-Up</p>
+            <p class="text-[10px] font-bold ${isJump ? 'text-cyan-300' : 'text-amber-300'}">${card.label}</p>
+            <p class="text-[8px] text-slate-400 uppercase">${isJump ? 'Leap Move' : 'Power-Up'}</p>
           </div>
         `;
         powerContainer.appendChild(btn);
@@ -857,8 +878,13 @@
       plannedQueue.forEach((card) => {
         const item = document.createElement('div');
         const isPower = card.type === 'power';
+        const isJump = card.type === 'jump';
         item.className = `flex items-center space-x-1 px-2 py-1 rounded-lg border text-xs shrink-0 ${
-          isPower ? 'bg-amber-950/60 border-amber-500/50 text-amber-300' : 'bg-slate-800 border-cyan-500/30 text-cyan-300'
+          isPower 
+            ? 'bg-amber-950/60 border-amber-500/50 text-amber-300' 
+            : isJump 
+              ? 'bg-cyan-950/60 border-cyan-500/50 text-cyan-200' 
+              : 'bg-slate-800 border-cyan-500/30 text-cyan-300'
         }`;
         item.innerHTML = `
           <span class="text-xs sm:text-sm">${card.icon}</span>
@@ -956,10 +982,6 @@
       isExecuting = true;
       document.getElementById('execute-btn').disabled = true;
 
-      if (isBossLevel && laserWarnings.length > 0) {
-        await fireTelegraphedLasers();
-      }
-
       for (let i = 0; i < plannedQueue.length; i++) {
         const card = plannedQueue[i];
 
@@ -1044,6 +1066,14 @@
         }
       }
 
+      if (isBossLevel && laserWarnings.length > 0) {
+        await fireTelegraphedLasers();
+        if (hp <= 0) {
+          showGameOverModal(false, `Zapped by ${boss.title}'s laser beam!`);
+          isExecuting = false; return;
+        }
+      }
+
       if (freezeTurns > 0) freezeTurns--;
       if (decoyCarrot) {
         decoyCarrot.turnsLeft--;
@@ -1116,19 +1146,24 @@
       } else if (card.effect === 'bomb') {
         playSound('bomb');
         triggerScreenShake();
-        const dirs = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[-1,-1],[1,-1],[-1,1]];
-        dirs.forEach(([dx, dy]) => {
-          const nx = player.x + dx, ny = player.y + dy;
-          if (nx >= 0 && nx < GRID_SIZE && ny >= 0 && ny < GRID_SIZE) {
-            if (mazeWalls[ny][nx] === 1) {
-              mazeWalls[ny][nx] = 0;
-              addParticles(nx, ny, 10, '#f59e0b');
+        // 2x2 Blast Area from player position downwards-right
+        for (let r = player.y; r <= player.y + 1; r++) {
+          for (let c = player.x; c <= player.x + 1; c++) {
+            if (r >= 0 && r < GRID_SIZE && c >= 0 && c < GRID_SIZE) {
+              if (mazeWalls[r][c] === 1) mazeWalls[r][c] = 0;
+              addParticles(c, r, 8, '#f59e0b');
             }
           }
-          if (isBossLevel && boss && Math.abs(boss.x - nx) <= 1 && Math.abs(boss.y - ny) <= 1) {
-            damageBoss(1);
+        }
+        monsters.forEach((m, idx) => {
+          if (m.x >= player.x && m.x <= player.x + 1 && m.y >= player.y && m.y <= player.y + 1) {
+            addParticles(m.x, m.y, 12, '#f59e0b');
+            monsters.splice(idx, 1);
           }
         });
+        if (isBossLevel && boss && boss.x >= player.x && boss.x <= player.x + 1 && boss.y >= player.y && boss.y <= player.y + 1) {
+          damageBoss(1);
+        }
       } else if (card.effect === 'decoy') {
         playSound('powerup');
         decoyCarrot = { x: player.x, y: player.y, turnsLeft: 2 };
@@ -1145,20 +1180,7 @@
         if (isBossLevel && boss && (boss.x === player.x || boss.y === player.y || boss.x - 1 === player.x || boss.y - 1 === player.y)) {
           damageBoss(1);
         }
-      } else if (card.effect === 'grapple') {
-        playSound('powerup');
-        const dirs = [{dx: 0, dy:-3}, {dx: 0, dy:3}, {dx: -3, dy:0}, {dx: 3, dy:0}];
-        for (let d of dirs) {
-          const gx = player.x + d.dx, gy = player.y + d.dy;
-          if (gx >= 0 && gx < GRID_SIZE && gy >= 0 && gy < GRID_SIZE && mazeWalls[gy][gx] === 0) {
-            addParticles(player.x, player.y, 10, '#38bdf8');
-            await animateMove(player, gx, gy, 160);
-            player.x = gx; player.y = gy;
-            break;
-          }
-        }
-      }
-      else if (card.effect === 'magnet') {
+      } else if (card.effect === 'magnet') {
         playSound('magnet');
         let countCollected = collectibles.length;
         if (countCollected > 0) {
@@ -1171,36 +1193,35 @@
           addParticles(player.x, player.y, 15, '#f59e0b');
         }
         updateHUD();
-      }
-      else if (card.effect === 'heal') {
+      } else if (card.effect === 'heal') {
         playSound('heal');
         if (hp < maxHp) {
           hp++;
           updateHUD();
         }
         addParticles(player.x, player.y, 20, '#f43f5e');
-      }
-      else if (card.effect === 'cluster') {
+      } else if (card.effect === 'cluster') {
         playSound('bomb');
         triggerScreenShake();
-        for (let r = player.y - 1; r <= player.y + 1; r++) {
-          for (let c = player.x - 1; c <= player.x + 1; c++) {
+        // 4x4 Blast Area
+        for (let r = player.y; r <= player.y + 3; r++) {
+          for (let c = player.x; c <= player.x + 3; c++) {
             if (r >= 0 && r < GRID_SIZE && c >= 0 && c < GRID_SIZE) {
               if (mazeWalls[r][c] === 1) mazeWalls[r][c] = 0;
-              addParticles(c, r, 8, '#ff6b00');
+              addParticles(c, r, 10, '#ff6b00');
             }
           }
         }
-        if (isBossLevel && boss && Math.abs(boss.x - player.x) <= 2 && Math.abs(boss.y - player.y) <= 2) {
-          damageBoss(2);
+        monsters.forEach((m, idx) => {
+          if (m.x >= player.x && m.x <= player.x + 3 && m.y >= player.y && m.y <= player.y + 3) {
+            addParticles(m.x, m.y, 15, '#ff6b00');
+            monsters.splice(idx, 1);
+          }
+        });
+        if (isBossLevel && boss && boss.x >= player.x && boss.x <= player.x + 3 && boss.y >= player.y && boss.y <= player.y + 3) {
+          damageBoss(1);
         }
-      }
-      else if (card.effect === 'slow') {
-        playSound('powerup');
-        freezeTurns = 4;
-        addParticles(player.x, player.y, 25, '#38bdf8');
-      }
-      else if (card.effect === 'phase') {
+      } else if (card.effect === 'phase') {
         playSound('powerup');
         const dirs = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[-1,-1],[1,-1],[-1,1]];
         dirs.forEach(([dx, dy]) => {
@@ -1213,8 +1234,7 @@
         });
         hasShield = true;
         updateHUD();
-      }
-      else if (card.effect === 'boomerang') {
+      } else if (card.effect === 'boomerang') {
         playSound('wind');
         if (isBossLevel && boss && boss.hp > 0) {
           damageBoss(1);
@@ -1229,8 +1249,7 @@
           addParticles(targetM.x, targetM.y, 18, '#f59e0b');
           monsters.splice(closestIdx, 1); 
         }
-      }
-      else if (card.effect === 'tornado') {
+      } else if (card.effect === 'tornado') {
         playSound('wind');
         triggerScreenShake();
         const openTiles = [];
@@ -1251,25 +1270,23 @@
             addParticles(pt.x, pt.y, 10, '#a855f7');
           }
         });
-      }
-      else if (card.effect === 'flash') {
-        playSound('powerup');
-        freezeTurns = 2;
-        for (let r = 0; r < GRID_SIZE; r++) {
-          for (let c = 0; c < GRID_SIZE; c++) {
-            addParticles(c, r, 2, '#fef08a');
-          }
-        }
-      }
-      else if (card.effect === 'mirror') {
+      } else if (card.effect === 'mirror') {
         playSound('powerup');
         mirrorClone = { x: player.x, y: player.y, turnsLeft: 3 };
         addParticles(player.x, player.y, 18, '#c084fc');
-      }
-      else if (card.effect === 'plasma') {
-        playSound('powerup');
-        plasmaTurns = 3;
-        addParticles(player.x, player.y, 22, '#38bdf8');
+      } else if (card.effect === 'plasma') {
+        playSound('laser');
+        triggerScreenShake();
+        // Deals 1 damage/clears all monsters on the screen
+        monsters.forEach((m) => {
+          addParticles(m.x, m.y, 15, '#38bdf8');
+        });
+        monsters = [];
+
+        if (isBossLevel && boss && boss.hp > 0) {
+          damageBoss(1);
+        }
+        addParticles(player.x, player.y, 30, '#00e5ff');
       }
 
       await new Promise(r => setTimeout(r, 200));
@@ -1508,8 +1525,15 @@
           return applyDamage();
         }
       }
-      for (let m of monsters) {
+      for (let i = monsters.length - 1; i >= 0; i--) {
+        let m = monsters[i];
         if (m.x === player.x && m.y === player.y) {
+          if (m.isElite && m.hp > 1) {
+            m.hp--;
+            playSound('boss_hit');
+            addParticles(m.x, m.y, 15, '#f59e0b');
+            return applyDamage();
+          }
           return applyDamage();
         }
       }
@@ -1537,7 +1561,7 @@
     }
 
     /* =========================================================================
-       6. CARROT SHOP & CATEGORIZED SKINS
+       6. CARROT SHOP & CATEGORIZED SKINS (Max HP Cap = 5)
        ========================================================================= */
     const shopModal = document.getElementById('shop-modal');
     document.getElementById('shop-btn').onclick = () => {
@@ -1560,11 +1584,14 @@
     });
 
     document.getElementById('buy-hp-btn').onclick = () => {
-      if (gems >= 30) {
+      if (gems >= 30 && maxHp < 5) {
         gems -= 30; maxHp++; hp++;
         playSound('powerup');
         updateHUD();
-        document.getElementById('buy-hp-btn').disabled = true;
+        if (maxHp >= 5) {
+          document.getElementById('buy-hp-btn').disabled = true;
+          document.getElementById('buy-hp-btn').innerText = 'MAX (5/5)';
+        }
       }
     };
     document.getElementById('buy-reroll-btn').onclick = () => {
@@ -1695,7 +1722,7 @@
     }
 
     /* =========================================================================
-       7. CANVAS GRAPHICS & RENDERING WITH FACE EXPRESSIONS
+       7. CANVAS GRAPHICS & RENDERING WITH ELITE MONSTER GLOWS
        ========================================================================= */
     function resizeCanvas() {
       const container = CANVAS.parentElement;
@@ -1766,10 +1793,16 @@
         CTR.strokeStyle = '#f59e0b'; CTR.lineWidth = 1.5;
         CTR.strokeRect(x + 5, y + 5, TILE_SIZE - 10, TILE_SIZE - 10);
 
+        CTR.font = `${Math.floor(TILE_SIZE * 0.38)}px sans-serif`;
+        CTR.textAlign = 'center';
+        CTR.textBaseline = 'middle';
+        CTR.fillText('⚠️', x + TILE_SIZE / 2, y + TILE_SIZE / 2 - 2);
+
         CTR.fillStyle = '#fde68a';
         CTR.font = '8px Nunito';
         CTR.textAlign = 'center';
-        CTR.fillText(t.cracked ? 'Broken' : 'Crumble', x + TILE_SIZE / 2, y + TILE_SIZE - 4);
+        CTR.textBaseline = 'alphabetic';
+        CTR.fillText(t.cracked ? 'Broken' : 'Crumble', x + TILE_SIZE / 2, y + TILE_SIZE - 3);
       });
     }
 
@@ -1790,6 +1823,7 @@
           CTR.fillStyle = '#d8b4fe';
           CTR.font = '8px Nunito';
           CTR.textAlign = 'center';
+          CTR.textBaseline = 'alphabetic';
           CTR.fillText('Warp', cx, cy + TILE_SIZE * 0.38);
         });
       });
@@ -1806,6 +1840,7 @@
         CTR.fillStyle = '#7dd3fc';
         CTR.font = '8px Nunito';
         CTR.textAlign = 'center';
+        CTR.textBaseline = 'alphabetic';
         CTR.fillText('Ice Slide', x + TILE_SIZE / 2, y + TILE_SIZE - 5);
       });
     }
@@ -1888,7 +1923,6 @@
       CTR.arc(0, 0, radius, 0, Math.PI * 2);
       CTR.fill();
 
-      // Ears / Features based on skin type
       if (activeSkin.type === 'bunny') {
         CTR.beginPath();
         CTR.ellipse(-radius * 0.45, -radius * 1.1, radius * 0.28, radius * 0.65, -0.15, 0, Math.PI * 2);
@@ -1939,13 +1973,11 @@
         CTR.fill();
       }
 
-      // Face Base
       CTR.fillStyle = '#f8fafc';
       CTR.beginPath();
       CTR.ellipse(0, radius * 0.05, radius * 0.72, radius * 0.65, 0, 0, Math.PI * 2);
       CTR.fill();
 
-      // Dynamic Face Expressions (Blinking / Determined Eyes based on execution state)
       CTR.fillStyle = '#0f172a';
       if (isExecuting) {
         CTR.beginPath();
@@ -1978,6 +2010,7 @@
       CTR.fillStyle = '#38bdf8';
       CTR.font = 'bold 10px Nunito';
       CTR.textAlign = 'center';
+      CTR.textBaseline = 'alphabetic';
       CTR.fillText(`🐾 ${activeSkin.name}`, cx, cy - TILE_SIZE * 0.42);
     }
 
@@ -2036,27 +2069,36 @@
       CTR.fillStyle = b.accent;
       CTR.font = 'bold 11px Fredoka';
       CTR.textAlign = 'center';
+      CTR.textBaseline = 'alphabetic';
       CTR.fillText(`👑 ${b.title}`, cx, cy - TILE_SIZE * 0.82);
     }
 
     function drawMonster(m) {
       const cx = m.animX * TILE_SIZE + TILE_SIZE / 2;
       const cy = m.animY * TILE_SIZE + TILE_SIZE / 2;
-      const radius = TILE_SIZE * 0.36;
+      const radius = TILE_SIZE * (m.isElite ? 0.42 : 0.36);
 
       CTR.save();
       CTR.translate(cx, cy);
 
       const isFrozen = freezeTurns > 0;
-      CTR.shadowColor = isFrozen ? '#38bdf8' : m.type === 'chaser' ? '#a855f7' : m.type === 'blink' ? '#ec4899' : '#dc2626';
-      CTR.shadowBlur = 20;
+      CTR.shadowColor = m.isElite ? '#f59e0b' : (isFrozen ? '#38bdf8' : m.type === 'chaser' ? '#a855f7' : m.type === 'blink' ? '#ec4899' : '#dc2626');
+      CTR.shadowBlur = m.isElite ? 25 : 20;
 
-      CTR.fillStyle = isFrozen ? '#1e3a8a' : m.type === 'chaser' ? '#581c87' : m.type === 'blink' ? '#831843' : '#4c1d95';
+      CTR.fillStyle = isFrozen ? '#1e3a8a' : (m.isElite ? '#78350f' : (m.type === 'chaser' ? '#581c87' : m.type === 'blink' ? '#831843' : '#4c1d95'));
       CTR.beginPath();
       CTR.arc(0, 0, radius, 0, Math.PI * 2);
       CTR.fill();
 
-      CTR.fillStyle = isFrozen ? '#3b82f6' : '#3b0764';
+      if (m.isElite) {
+        CTR.strokeStyle = '#fbbf24';
+        CTR.lineWidth = 2.5;
+        CTR.beginPath();
+        CTR.arc(0, 0, radius * 1.15, 0, Math.PI * 2);
+        CTR.stroke();
+      }
+
+      CTR.fillStyle = isFrozen ? '#3b82f6' : (m.isElite ? '#b45309' : '#3b0764');
       CTR.beginPath();
       CTR.moveTo(-radius * 0.6, -radius * 0.2);
       CTR.lineTo(-radius * 0.8, -radius * 1.2);
@@ -2069,7 +2111,7 @@
       CTR.lineTo(radius * 0.1, -radius * 0.6);
       CTR.fill();
 
-      CTR.fillStyle = isFrozen ? '#93c5fd' : '#f43f5e';
+      CTR.fillStyle = isFrozen ? '#93c5fd' : (m.isElite ? '#fef08a' : '#f43f5e');
       CTR.beginPath();
       CTR.ellipse(-radius * 0.28, -radius * 0.1, radius * 0.15, radius * 0.2, 0.2, 0, Math.PI * 2);
       CTR.ellipse(radius * 0.28, -radius * 0.1, radius * 0.15, radius * 0.2, -0.2, 0, Math.PI * 2);
@@ -2077,10 +2119,11 @@
 
       CTR.restore();
 
-      CTR.fillStyle = m.type === 'chaser' ? '#c084fc' : m.type === 'blink' ? '#f472b6' : '#f87171';
+      CTR.fillStyle = m.isElite ? '#fbbf24' : (m.type === 'chaser' ? '#c084fc' : m.type === 'blink' ? '#f472b6' : '#f87171');
       CTR.font = 'bold 9px Nunito';
       CTR.textAlign = 'center';
-      CTR.fillText(`👾 ${m.type.toUpperCase()}`, cx, cy - TILE_SIZE * 0.42);
+      CTR.textBaseline = 'alphabetic';
+      CTR.fillText(m.isElite ? `⚡ ELITE ${m.type.toUpperCase()}` : `👾 ${m.type.toUpperCase()}`, cx, cy - TILE_SIZE * 0.42);
     }
 
     function drawTraps() {
@@ -2122,9 +2165,17 @@
         }
         CTR.restore();
 
+        if (['spikes', 'lava', 'crush'].includes(t.type)) {
+          CTR.font = `${Math.floor(TILE_SIZE * 0.38)}px sans-serif`;
+          CTR.textAlign = 'center';
+          CTR.textBaseline = 'middle';
+          CTR.fillText('⚠️', cx, cy - 2);
+        }
+
         CTR.fillStyle = '#fb923c';
         CTR.font = '8px Nunito';
         CTR.textAlign = 'center';
+        CTR.textBaseline = 'alphabetic';
         CTR.fillText(t.type === 'spikes' ? 'Spikes' : t.type === 'lava' ? 'Lava' : t.type === 'crush' ? 'Crush' : 'Portal', cx, cy + TILE_SIZE * 0.38);
       });
     }
@@ -2145,6 +2196,7 @@
       CTR.fillStyle = '#f59e0b';
       CTR.font = '8px Nunito';
       CTR.textAlign = 'center';
+      CTR.textBaseline = 'alphabetic';
       CTR.fillText('Decoy', cx, cy + TILE_SIZE * 0.38);
     }
 
@@ -2167,6 +2219,7 @@
       CTR.fillStyle = '#c084fc';
       CTR.font = '8px Nunito';
       CTR.textAlign = 'center';
+      CTR.textBaseline = 'alphabetic';
       CTR.fillText('Clone', cx, cy + TILE_SIZE * 0.38);
     }
 
@@ -2193,6 +2246,7 @@
         CTR.fillStyle = '#fbbf24';
         CTR.font = '8px Nunito';
         CTR.textAlign = 'center';
+        CTR.textBaseline = 'alphabetic';
         CTR.fillText('Carrot', cx, cy + TILE_SIZE * 0.38);
       });
     }
@@ -2217,6 +2271,7 @@
         CTR.fillStyle = '#f59e0b';
         CTR.font = 'bold 9px Nunito';
         CTR.textAlign = 'center';
+        CTR.textBaseline = 'alphabetic';
         CTR.fillText('🔑 Key', kx, ky - TILE_SIZE * 0.35);
       }
 
@@ -2252,6 +2307,7 @@
       CTR.fillStyle = '#a855f7';
       CTR.font = 'bold 9px Nunito';
       CTR.textAlign = 'center';
+      CTR.textBaseline = 'alphabetic';
       CTR.fillText('🌀 Portal', ex, ey - TILE_SIZE * 0.42);
     }
 
