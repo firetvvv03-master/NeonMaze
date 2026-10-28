@@ -112,10 +112,14 @@
 
       <!-- Actions Right -->
       <div class="flex items-center space-x-1.5 sm:space-x-3">
-        <div class="flex items-center space-x-1 bg-slate-800/80 px-2.5 py-1 rounded-xl border border-slate-700">
+        <div class="flex items-center space-x-1 bg-slate-800/80 px-2.5 py-1 rounded-xl border border-slate-700" title="Turn Limit">
           <span class="text-[10px] text-slate-400 font-bold uppercase">Turn</span>
-          <span id="turn-display" class="font-fredoka text-cyan-300 text-sm sm:text-base">1</span>
+          <span id="turn-display" class="font-fredoka text-cyan-300 text-sm sm:text-base">1/13</span>
         </div>
+        <button id="mode-toggle-btn" class="px-2.5 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-bold transition flex items-center space-x-1" title="Toggle Game Mode">
+          <span>🎮</span>
+          <span id="mode-text">Campaign</span>
+        </button>
         <button id="shop-btn" class="px-2.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold transition flex items-center space-x-1">
           <span>🛒</span>
           <span class="hidden sm:inline">Shop</span>
@@ -259,7 +263,7 @@
         <!-- Skin Categories Selector & Grid -->
         <div>
           <div class="flex items-center justify-between mb-2">
-            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Animal Skins (30 Styles)</h3>
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Animal Skins (60 Styles)</h3>
             <div id="skin-tabs" class="flex space-x-1 bg-slate-800 p-1 rounded-xl border border-slate-700">
               <button data-cat="bunny" class="skin-tab-btn px-2.5 py-1 text-[10px] font-bold rounded-lg bg-cyan-500 text-slate-950 transition">🐰 Bunnies</button>
               <button data-cat="cat_friends" class="skin-tab-btn px-2.5 py-1 text-[10px] font-bold rounded-lg text-slate-300 hover:text-white transition">🐱 Friends</button>
@@ -299,6 +303,7 @@
     let gems = 0;
     let level = 1;
     let turnCount = 1;
+    let maxTurnLimit = 13;
     let rerolls = 1;
     let hasShield = false;
     let freezeTurns = 0;
@@ -307,6 +312,7 @@
     let keyCollected = false;
     let isExecuting = false;
     let soundEnabled = true;
+    let gameMode = 'campaign'; // 'campaign' or 'endless'
 
     let isBossLevel = false;
     let boss = null; 
@@ -314,9 +320,8 @@
     let highScore = parseInt(localStorage.getItem('neon_bunny_highscore_ultimate') || '1');
     document.getElementById('high-score-display').innerText = highScore;
 
-    // 30 Total Free Skins organized into 3 Categories with 10 Styles each
     const SKINS = [
-      // CATEGORY 1: BUNNIES (10 Styles)
+      // --- BUNNIES (20 Styles) ---
       { id: 'cyan', name: 'Neon Cyan Bunny', category: 'bunny', type: 'bunny', color: '#00e5ff', earInner: '#a5f3fc', blush: '#38bdf8', unlocked: true },
       { id: 'pink', name: 'Cyber Pink Bunny', category: 'bunny', type: 'bunny', color: '#ec4899', earInner: '#fbcfe8', blush: '#f43f5e', unlocked: true },
       { id: 'gold', name: 'Golden Bunny', category: 'bunny', type: 'bunny', color: '#f59e0b', earInner: '#fef08a', blush: '#fbbf24', unlocked: true },
@@ -327,8 +332,18 @@
       { id: 'sunset', name: 'Sunset Orange', category: 'bunny', type: 'bunny', color: '#fb923c', earInner: '#ffedd5', blush: '#f97316', unlocked: true },
       { id: 'ruby', name: 'Ruby Heart', category: 'bunny', type: 'bunny', color: '#e11d48', earInner: '#ffe4e6', blush: '#be123c', unlocked: true },
       { id: 'galaxy', name: 'Cosmic Galaxy', category: 'bunny', type: 'bunny', color: '#6366f1', earInner: '#e0e7ff', blush: '#4f46e5', unlocked: true },
+      { id: 'cobalt', name: 'Cobalt Runner', category: 'bunny', type: 'bunny', color: '#2563eb', earInner: '#bfdbfe', blush: '#1d4ed8', unlocked: true },
+      { id: 'lime', name: 'Cyber Lime', category: 'bunny', type: 'bunny', color: '#84cc16', earInner: '#ecfccb', blush: '#65a30d', unlocked: true },
+      { id: 'teal', name: 'Electric Teal', category: 'bunny', type: 'bunny', color: '#06b6d4', earInner: '#cffafe', blush: '#0891b2', unlocked: true },
+      { id: 'pearl', name: 'Holographic Pearl', category: 'bunny', type: 'bunny', color: '#f8fafc', earInner: '#e2e8f0', blush: '#cbd5e1', unlocked: true },
+      { id: 'magenta', name: 'Vaporwave Magenta', category: 'bunny', type: 'bunny', color: '#db2777', earInner: '#fce7f3', blush: '#be185d', unlocked: true },
+      { id: 'slime', name: 'Toxic Slime', category: 'bunny', type: 'bunny', color: '#65a30d', earInner: '#ecfccb', blush: '#4d7c0f', unlocked: true },
+      { id: 'amethyst', name: 'Amethyst Spark', category: 'bunny', type: 'bunny', color: '#7c3aed', earInner: '#ede9fe', blush: '#6d28d9', unlocked: true },
+      { id: 'blade', name: 'Crimson Blade', category: 'bunny', type: 'bunny', color: '#dc2626', earInner: '#fee2e2', blush: '#b91c1c', unlocked: true },
+      { id: 'tangerine', name: 'Tangerine Glow', category: 'bunny', type: 'bunny', color: '#ea580c', earInner: '#ffedd5', blush: '#c2410c', unlocked: true },
+      { id: 'obsidian', name: 'Midnight Obsidian', category: 'bunny', type: 'bunny', color: '#1e293b', earInner: '#475569', blush: '#0f172a', unlocked: true },
 
-      // CATEGORY 2: CAT & FRIENDS (10 Styles)
+      // --- CAT & FRIENDS (20 Styles) ---
       { id: 'cat_kitty', name: 'Neon Kitty', category: 'cat_friends', type: 'cat', color: '#fb7185', earInner: '#fbcfe8', blush: '#f43f5e', unlocked: true },
       { id: 'dog_puppy', name: 'Sparkle Puppy', category: 'cat_friends', type: 'dog', color: '#a16207', earInner: '#fef08a', blush: '#ca8a04', unlocked: true },
       { id: 'hamster_cheek', name: 'Chubby Hamster', category: 'cat_friends', type: 'hamster', color: '#fb923c', earInner: '#ffedd5', blush: '#f97316', unlocked: true },
@@ -339,8 +354,18 @@
       { id: 'dog_cyber', name: 'Cyber Hound', category: 'cat_friends', type: 'dog', color: '#94a3b8', earInner: '#f1f5f9', blush: '#64748b', unlocked: true },
       { id: 'owl_wise', name: 'Neon Owl', category: 'cat_friends', type: 'owl', color: '#8b5cf6', earInner: '#ede9fe', blush: '#7c3aed', unlocked: true },
       { id: 'mouse_squeak', name: 'Pico Mouse', category: 'cat_friends', type: 'mouse', color: '#cbd5e1', earInner: '#f8fafc', blush: '#94a3b8', unlocked: true },
+      { id: 'calico', name: 'Neon Calico', category: 'cat_friends', type: 'cat', color: '#ea580c', earInner: '#fed7aa', blush: '#c2410c', unlocked: true },
+      { id: 'panther', name: 'Cyber Panther', category: 'cat_friends', type: 'cat', color: '#0f172a', earInner: '#334155', blush: '#020617', unlocked: true },
+      { id: 'husky', name: 'Electric Husky', category: 'cat_friends', type: 'dog', color: '#38bdf8', earInner: '#bae6fd', blush: '#0284c7', unlocked: true },
+      { id: 'retriever', name: 'Golden Retriever', category: 'cat_friends', type: 'dog', color: '#d97706', earInner: '#fde68a', blush: '#b45309', unlocked: true },
+      { id: 'siamese', name: 'Neon Siamese', category: 'cat_friends', type: 'cat', color: '#a855f7', earInner: '#e9d5ff', blush: '#9333ea', unlocked: true },
+      { id: 'raccoon_cyber', name: 'Cyber Raccoon', category: 'cat_friends', type: 'raccoon', color: '#64748b', earInner: '#cbd5e1', blush: '#475569', unlocked: true },
+      { id: 'hamster_laser', name: 'Laser Hamster', category: 'cat_friends', type: 'hamster', color: '#f43f5e', earInner: '#ffe4e6', blush: '#e11d48', unlocked: true },
+      { id: 'parrot', name: 'Pixel Parrot', category: 'cat_friends', type: 'duck', color: '#10b981', earInner: '#a7f3d0', blush: '#059669', unlocked: true },
+      { id: 'axolotl', name: 'Neon Axolotl', category: 'cat_friends', type: 'mouse', color: '#f472b6', earInner: '#fbcfe8', blush: '#ec4899', unlocked: true },
+      { id: 'bat', name: 'Shadow Bat', category: 'cat_friends', type: 'owl', color: '#312e81', earInner: '#4338ca', blush: '#1e1b4b', unlocked: true },
 
-      // CATEGORY 3: WILD & FOREST (10 Styles)
+      // --- WILD & FOREST (20 Styles) ---
       { id: 'bear_teddy', name: 'Honey Bear', category: 'wild', type: 'bear', color: '#d97706', earInner: '#fde68a', blush: '#b45309', unlocked: true },
       { id: 'panda_bamboo', name: 'Cyber Panda', category: 'wild', type: 'panda', color: '#334155', earInner: '#cbd5e1', blush: '#64748b', unlocked: true },
       { id: 'koala_eucaly', name: 'Dreamy Koala', category: 'wild', type: 'koala', color: '#64748b', earInner: '#cbd5e1', blush: '#475569', unlocked: true },
@@ -350,12 +375,21 @@
       { id: 'wolf_shadow', name: 'Shadow Wolf', category: 'wild', type: 'wolf', color: '#475569', earInner: '#94a3b8', blush: '#334155', unlocked: true },
       { id: 'raccoon_bandit', name: 'Masked Raccoon', category: 'wild', type: 'raccoon', color: '#64748b', earInner: '#cbd5e1', blush: '#475569', unlocked: true },
       { id: 'hedgehog_spike', name: 'Neon Hedgehog', category: 'wild', type: 'hedgehog', color: '#a16207', earInner: '#fef08a', blush: '#854d0e', unlocked: true },
-      { id: 'squirrel_nut', name: 'Cyber Squirrel', category: 'wild', type: 'squirrel', color: '#d97706', earInner: '#ffedd5', blush: '#b45309', unlocked: true }
+      { id: 'squirrel_nut', name: 'Cyber Squirrel', category: 'wild', type: 'squirrel', color: '#d97706', earInner: '#ffedd5', blush: '#b45309', unlocked: true },
+      { id: 'grizzly', name: 'Cyber Grizzly', category: 'wild', type: 'bear', color: '#78350f', earInner: '#92400e', blush: '#451a03', unlocked: true },
+      { id: 'moose', name: 'Neon Moose', category: 'wild', type: 'deer', color: '#9a3412', earInner: '#c2410c', blush: '#7c2d12', unlocked: true },
+      { id: 'bison', name: 'Electric Bison', category: 'wild', type: 'bull', color: '#451a03', earInner: '#78350f', blush: '#292524', unlocked: true },
+      { id: 'stag', name: 'Crystal Stag', category: 'wild', type: 'deer', color: '#0284c7', earInner: '#7dd3fc', blush: '#0369a1', unlocked: true },
+      { id: 'toad', name: 'Bioluminescent Toad', category: 'wild', type: 'frog', color: '#15803d', earInner: '#4ade80', blush: '#166534', unlocked: true },
+      { id: 'panther_wild', name: 'Shadow Panther', category: 'wild', type: 'wolf', color: '#172554', earInner: '#1e3a8a', blush: '#0f172a', unlocked: true },
+      { id: 'boar', name: 'Magma Boar', category: 'wild', type: 'bear', color: '#7c2d12', earInner: '#ea580c', blush: '#431407', unlocked: true },
+      { id: 'lynx', name: 'Glacial Lynx', category: 'wild', type: 'cat', color: '#0369a1', earInner: '#38bdf8', blush: '#075985', unlocked: true },
+      { id: 'eagle', name: 'Storm Eagle', category: 'wild', type: 'owl', color: '#334155', earInner: '#64748b', blush: '#1e293b', unlocked: true },
+      { id: 'fox_void', name: 'Void Fox', category: 'wild', type: 'fox', color: '#581c87', earInner: '#c084fc', blush: '#3b0764', unlocked: true }
     ];
     let activeSkin = SKINS[0];
     let activeSkinCategory = 'bunny';
 
-    // 20 Unique Boss Data Catalog
     const BOSS_CATALOG = [
       { name: "The Shadow King", color: "#881337", accent: "#f43f5e" },
       { name: "Inferno Baron", color: "#7c2d12", accent: "#f97316" },
@@ -387,6 +421,7 @@
     let iceTiles = []; 
     let crumblingTiles = []; 
     let warpPads = []; 
+    let tripwires = [];
     let decoyCarrot = null; 
     let laserWarnings = []; 
     let collectibles = []; 
@@ -396,7 +431,6 @@
     let powerupDeck = [];
     let plannedQueue = [];
 
-    // Standard movement cards (Up, Down, Left, Right)
     const MOVEMENT_CARDS = [
       { id: 'UP', label: 'Up 1', icon: '⬆️', dx: 0, dy: -1, type: 'move' },
       { id: 'DOWN', label: 'Down 1', icon: '⬇️', dx: 0, dy: 1, type: 'move' },
@@ -404,7 +438,6 @@
       { id: 'RIGHT', label: 'Right 1', icon: '➡️', dx: 1, dy: 0, type: 'move' }
     ];
 
-    // Leap Cards
     const LEAP_CARDS = [
       { id: 'JUMP_UP', label: 'Leap Up', icon: '🐰⬆️', dx: 0, dy: -2, type: 'jump', desc: 'Leap Up: Jump 2 tiles forward vertically over obstacles.' },
       { id: 'JUMP_DOWN', label: 'Leap Down', icon: '🐰⬇️', dx: 0, dy: 2, type: 'jump', desc: 'Leap Down: Jump 2 tiles backward vertically over obstacles.' },
@@ -563,16 +596,31 @@
        3. MAZE GENERATION & LEVEL SETUP
        ========================================================================= */
     function initLevel() {
-      isBossLevel = (level % 4 === 0);
+      isBossLevel = (gameMode === 'campaign' && level % 4 === 0);
       
       GRID_SIZE = isBossLevel ? 11 : Math.min(15, 9 + Math.floor((level - 1) / 3) * 2);
+      if (gameMode === 'endless') {
+        GRID_SIZE = Math.min(15, 9 + Math.floor(level / 2));
+      }
       resizeCanvas();
 
+      // Set turn limits based on game type
+      if (isBossLevel) {
+        const bossNum = Math.floor(level / 4);
+        maxTurnLimit = 20 + (bossNum - 1);
+      } else {
+        if (GRID_SIZE <= 9) maxTurnLimit = 13;
+        else if (GRID_SIZE <= 13) maxTurnLimit = 14;
+        else maxTurnLimit = 15;
+        if (gameMode === 'endless') maxTurnLimit = Math.max(10, 15 - Math.floor(level / 3));
+      }
+
+      turnCount = 1;
       player.x = 0; player.y = 0;
       player.animX = 0; player.animY = 0;
 
       exitPos = { x: GRID_SIZE - 1, y: GRID_SIZE - 1 };
-      keyCollected = !isBossLevel && level < 3; 
+      keyCollected = !isBossLevel && (level < 3 || gameMode === 'endless'); 
       keyPos = null;
       decoyCarrot = null;
       mirrorClone = null;
@@ -597,7 +645,7 @@
       } else {
         bossHud.classList.add('hidden');
         bossHud.classList.remove('flex');
-        setTipText('Select cards to queue moves, then press RUN!');
+        setTipText(gameMode === 'endless' ? `♾️ ENDLESS SURVIVAL: Floor ${level}` : 'Select cards to queue moves, then press RUN!');
       }
 
       plannedQueue = [];
@@ -608,7 +656,7 @@
 
     function generateMazeGrid() {
       mazeWalls = Array(GRID_SIZE).fill(0).map(() => Array(GRID_SIZE).fill(0));
-      const wallDensity = isBossLevel ? 0.14 : Math.min(0.30, 0.16 + level * 0.015);
+      const wallDensity = isBossLevel ? 0.14 : Math.min(0.32, 0.16 + level * 0.02);
 
       for (let r = 0; r < GRID_SIZE; r++) {
         for (let c = 0; c < GRID_SIZE; c++) {
@@ -627,6 +675,7 @@
       iceTiles = [];
       crumblingTiles = [];
       warpPads = [];
+      tripwires = [];
       collectibles = [];
       monsters = [];
 
@@ -652,7 +701,7 @@
         }
       }
 
-      collectibles.push({ x: 1, y: 3, type: 'gem' }, { x: 4, y: 1, type: 'gem' }, { x: 3, y: GRID_SIZE - 2, type: 'gem' });
+      collectibles.push({ x: 1, y: 3, type: 'gem' }, { x: 4, y: 1, type: 'gem' }, { x: 3, y: GRID_SIZE - 2, type: 'gem' }, { x: 2, y: 2, type: 'heart' });
       traps.push({ x: 2, y: 4, type: 'lava' }, { x: GRID_SIZE - 3, y: 2, type: 'crush' });
     }
 
@@ -693,6 +742,7 @@
       iceTiles = [];
       crumblingTiles = [];
       warpPads = [];
+      tripwires = [];
       collectibles = [];
       monsters = [];
 
@@ -710,24 +760,36 @@
         keyPos = openTiles.pop();
       }
 
-      const crumbCount = Math.min(5, Math.floor(level * 0.7));
+      // Spawn Floor Hearts (1-2 per round)
+      const heartCount = Math.floor(Math.random() * 2) + 1;
+      for (let i = 0; i < heartCount && openTiles.length > 0; i++) {
+        collectibles.push({ ...openTiles.pop(), type: 'heart' });
+      }
+
+      // Spawn Laser Tripwires
+      const tripwireCount = Math.min(5, 2 + Math.floor(level * 0.5));
+      for (let i = 0; i < tripwireCount && openTiles.length > 0; i++) {
+        tripwires.push({ ...openTiles.pop(), active: Math.random() < 0.5 });
+      }
+
+      const crumbCount = Math.min(6, Math.floor(level * 0.8));
       for (let i = 0; i < crumbCount && openTiles.length > 0; i++) {
         crumblingTiles.push({ ...openTiles.pop(), cracked: false });
       }
 
-      if (level >= 3 && openTiles.length >= 2) {
+      if ((level >= 3 || gameMode === 'endless') && openTiles.length >= 2) {
         const p1 = openTiles.pop();
         const p2 = openTiles.pop();
         warpPads.push({ x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y });
       }
 
-      const iceCount = Math.min(5, Math.floor(level * 0.6));
+      const iceCount = Math.min(6, Math.floor(level * 0.7));
       for (let i = 0; i < iceCount && openTiles.length > 0; i++) {
         iceTiles.push(openTiles.pop());
       }
 
       const trapTypes = ['spikes', 'lava', 'crush', 'teleport'];
-      const trapCount = Math.min(6, 2 + Math.floor(level * 0.8));
+      const trapCount = Math.min(7, 2 + Math.floor(level * 0.9));
       for (let i = 0; i < trapCount && openTiles.length > 0; i++) {
         const pt = openTiles.pop();
         traps.push({ x: pt.x, y: pt.y, type: trapTypes[Math.floor(Math.random() * trapTypes.length)] });
@@ -739,7 +801,7 @@
         collectibles.push({ x: pt.x, y: pt.y, type: 'gem' });
       }
 
-      const monsterCount = Math.min(6, 1 + Math.floor(level / 1.1));
+      const monsterCount = Math.min(8, 1 + Math.floor(level / 0.9));
       for (let i = 0; i < monsterCount && openTiles.length > 0; i++) {
         const pt = openTiles.pop();
         const randType = Math.random();
@@ -747,13 +809,13 @@
         let isElite = false;
         let hpVal = 1;
 
-        if (level >= 3 && Math.random() < 0.25) {
+        if ((level >= 3 || gameMode === 'endless') && Math.random() < 0.3) {
           isElite = true;
           hpVal = 2;
         }
 
-        if (randType > 0.6) mType = 'chaser';
-        else if (randType > 0.35) mType = 'blink';
+        if (randType > 0.55) mType = 'chaser';
+        else if (randType > 0.3) mType = 'blink';
 
         monsters.push({
           x: pt.x, y: pt.y,
@@ -948,11 +1010,19 @@
       e.target.innerText = soundEnabled ? '🔊' : '🔇';
     };
 
+    document.getElementById('mode-toggle-btn').onclick = () => {
+      gameMode = gameMode === 'campaign' ? 'endless' : 'campaign';
+      document.getElementById('mode-text').innerText = gameMode === 'campaign' ? 'Campaign' : 'Endless';
+      level = 1;
+      hp = maxHp;
+      initLevel();
+    };
+
     function updateHUD() {
       document.getElementById('hp-display').innerText = `${hp}/${maxHp}`;
       document.getElementById('gems-display').innerText = gems;
       document.getElementById('level-display').innerText = level;
-      document.getElementById('turn-display').innerText = turnCount;
+      document.getElementById('turn-display').innerText = `${turnCount}/${maxTurnLimit}`;
       document.getElementById('reroll-text').innerText = `Reroll (${rerolls})`;
       document.getElementById('reroll-btn').disabled = rerolls <= 0;
 
@@ -1031,9 +1101,9 @@
 
           checkCollectibles();
 
-          if (checkTraps()) {
+          if (checkTraps() || checkTripwires()) {
             if (hp <= 0) {
-              showGameOverModal(false, "Slipped into a deadly trap!");
+              showGameOverModal(false, "Slipped into a deadly hazard!");
               isExecuting = false; return;
             }
           }
@@ -1054,7 +1124,7 @@
               playSound('win');
               addParticles(exitPos.x, exitPos.y, 25, '#38bdf8');
               await new Promise(r => setTimeout(r, 400));
-              showGameOverModal(true, isBossLevel ? `Boss Defeated! Portal Unlocked!` : `Level ${level} Cleared!`);
+              showGameOverModal(true, isBossLevel ? `Boss Defeated! Portal Unlocked!` : (gameMode === 'endless' ? `Floor ${level} Survived!` : `Level ${level} Cleared!`));
               isExecuting = false; return;
             }
           }
@@ -1094,6 +1164,9 @@
         });
       }
 
+      // Toggle Laser Tripwire state every turn
+      tripwires.forEach(tw => tw.active = !tw.active);
+
       if (freezeTurns <= 0) {
         if (isBossLevel && boss && boss.hp > 0) {
           await moveBoss();
@@ -1110,6 +1183,11 @@
       }
 
       turnCount++;
+      if (turnCount > maxTurnLimit) {
+        showGameOverModal(false, `Time's Up! Exceeded the turn limit (${maxTurnLimit} Turns)!`);
+        isExecuting = false; return;
+      }
+
       if (turnCount % 3 === 0) rerolls++;
       plannedQueue = [];
       rollDeck();
@@ -1146,7 +1224,6 @@
       } else if (card.effect === 'bomb') {
         playSound('bomb');
         triggerScreenShake();
-        // 2x2 Blast Area from player position downwards-right
         for (let r = player.y; r <= player.y + 1; r++) {
           for (let c = player.x; c <= player.x + 1; c++) {
             if (r >= 0 && r < GRID_SIZE && c >= 0 && c < GRID_SIZE) {
@@ -1184,7 +1261,10 @@
         playSound('magnet');
         let countCollected = collectibles.length;
         if (countCollected > 0) {
-          gems += countCollected * 10;
+          collectibles.forEach(g => {
+            if (g.type === 'gem') gems += 10;
+            else if (g.type === 'heart' && hp < maxHp) hp++;
+          });
           collectibles = [];
           addParticles(player.x, player.y, 20, '#fbbf24');
         }
@@ -1203,7 +1283,6 @@
       } else if (card.effect === 'cluster') {
         playSound('bomb');
         triggerScreenShake();
-        // 4x4 Blast Area
         for (let r = player.y; r <= player.y + 3; r++) {
           for (let c = player.x; c <= player.x + 3; c++) {
             if (r >= 0 && r < GRID_SIZE && c >= 0 && c < GRID_SIZE) {
@@ -1277,7 +1356,6 @@
       } else if (card.effect === 'plasma') {
         playSound('laser');
         triggerScreenShake();
-        // Deals 1 damage/clears all monsters on the screen
         monsters.forEach((m) => {
           addParticles(m.x, m.y, 15, '#38bdf8');
         });
@@ -1319,6 +1397,15 @@
           addParticles(w.x1, w.y1, 12, '#38bdf8');
         }
       });
+    }
+
+    function checkTripwires() {
+      for (let tw of tripwires) {
+        if (tw.x === player.x && tw.y === player.y && tw.active) {
+          return applyDamage();
+        }
+      }
+      return false;
     }
 
     function damageBoss(amt) {
@@ -1481,9 +1568,15 @@
     function checkCollectibles() {
       for (let i = collectibles.length - 1; i >= 0; i--) {
         if (collectibles[i].x === player.x && collectibles[i].y === player.y) {
-          gems += 10;
-          playSound('gem');
-          addParticles(player.x, player.y, 12, '#fbbf24');
+          if (collectibles[i].type === 'gem') {
+            gems += 10;
+            playSound('gem');
+            addParticles(player.x, player.y, 12, '#fbbf24');
+          } else if (collectibles[i].type === 'heart') {
+            if (hp < maxHp) hp++;
+            playSound('heal');
+            addParticles(player.x, player.y, 15, '#f43f5e');
+          }
           collectibles.splice(i, 1);
           updateHUD();
         }
@@ -1640,6 +1733,8 @@
         else if (skin.type === 'raccoon') iconEmoji = '🦝';
         else if (skin.type === 'hedgehog') iconEmoji = '🦔';
         else if (skin.type === 'squirrel') iconEmoji = '🐿️';
+        else if (skin.type === 'deer') iconEmoji = '🦌';
+        else if (skin.type === 'bull') iconEmoji = '🐂';
 
         item.innerHTML = `
           <div class="w-8 h-8 rounded-full mb-1 flex items-center justify-center font-bold shadow" style="background:${skin.color}">${iconEmoji}</div>
@@ -1681,7 +1776,7 @@
         if (turnCount > 15) rank = 'A';
         if (turnCount > 25) rank = 'B';
 
-        const rewardGems = isBossLevel ? 35 : 12;
+        const rewardGems = (isBossLevel ? 35 : 12) * (gameMode === 'endless' ? 2 : 1);
 
         content.innerHTML = `
           <div class="text-5xl mb-2">${isBossLevel ? '👑' : '🎉'}</div>
@@ -1690,7 +1785,7 @@
           <div class="bg-slate-800/80 p-3 rounded-2xl mb-4 text-xs space-y-1 text-left">
             <div class="flex justify-between"><span>Performance Rank:</span><span class="font-fredoka text-amber-400 text-base">${rank}</span></div>
             <div class="flex justify-between"><span>Carrots Bonus:</span><span class="font-bold text-amber-400">+${rewardGems} 🥕</span></div>
-            <div class="flex justify-between"><span>Total Turns:</span><span class="font-bold text-cyan-300">${turnCount}</span></div>
+            <div class="flex justify-between"><span>Total Turns Used:</span><span class="font-bold text-cyan-300">${turnCount} / ${maxTurnLimit}</span></div>
           </div>
           <button id="next-level-btn" class="w-full py-2.5 bg-gradient-to-r from-cyan-400 to-emerald-400 hover:from-cyan-300 hover:to-emerald-300 text-slate-950 font-fredoka uppercase text-sm rounded-xl shadow-lg glow-cyan transition">
             Next Level 🚀
@@ -1722,7 +1817,7 @@
     }
 
     /* =========================================================================
-       7. CANVAS GRAPHICS & RENDERING WITH ELITE MONSTER GLOWS
+       7. CANVAS GRAPHICS & RENDERING
        ========================================================================= */
     function resizeCanvas() {
       const container = CANVAS.parentElement;
@@ -1739,6 +1834,7 @@
       drawGrid();
       drawCrumblingAndPits();
       drawWarpPads();
+      drawTripwires();
       drawIceTiles();
       drawLaserWarnings();
       drawPathPreview();
@@ -1783,6 +1879,32 @@
           }
         }
       }
+    }
+
+    function drawTripwires() {
+      tripwires.forEach(tw => {
+        const x = tw.x * TILE_SIZE, y = tw.y * TILE_SIZE;
+        CTR.save();
+        if (tw.active) {
+          CTR.fillStyle = 'rgba(239, 68, 68, 0.25)';
+          CTR.fillRect(x + 2, y + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+          CTR.strokeStyle = '#ef4444'; CTR.lineWidth = 2;
+          CTR.shadowColor = '#ef4444'; CTR.shadowBlur = 10;
+          CTR.strokeRect(x + 4, y + 4, TILE_SIZE - 8, TILE_SIZE - 8);
+        } else {
+          CTR.fillStyle = 'rgba(148, 163, 184, 0.1)';
+          CTR.fillRect(x + 2, y + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+          CTR.strokeStyle = '#64748b'; CTR.lineWidth = 1;
+          CTR.strokeRect(x + 6, y + 6, TILE_SIZE - 12, TILE_SIZE - 12);
+        }
+        CTR.restore();
+
+        CTR.fillStyle = tw.active ? '#f87171' : '#94a3b8';
+        CTR.font = '8px Nunito';
+        CTR.textAlign = 'center';
+        CTR.textBaseline = 'alphabetic';
+        CTR.fillText(tw.active ? '⚡ Wire ON' : 'Wire OFF', x + TILE_SIZE / 2, y + TILE_SIZE - 4);
+      });
     }
 
     function drawCrumblingAndPits() {
@@ -1961,7 +2083,7 @@
         CTR.arc(-radius * 0.7, -radius * 0.7, radius * 0.16, 0, Math.PI * 2);
         CTR.arc(radius * 0.7, -radius * 0.7, radius * 0.16, 0, Math.PI * 2);
         CTR.fill();
-      } else if (['dog', 'lion', 'tiger'].includes(activeSkin.type)) {
+      } else if (['dog', 'lion', 'tiger', 'deer', 'bull'].includes(activeSkin.type)) {
         CTR.beginPath();
         CTR.ellipse(-radius * 0.75, -radius * 0.4, radius * 0.25, radius * 0.45, 0.3, 0, Math.PI * 2);
         CTR.ellipse(radius * 0.75, -radius * 0.4, radius * 0.25, radius * 0.45, -0.3, 0, Math.PI * 2);
@@ -2230,24 +2352,32 @@
         const cy = g.y * TILE_SIZE + TILE_SIZE / 2 + Math.sin(time + g.x) * 4;
 
         CTR.save();
-        CTR.shadowColor = '#fbbf24'; CTR.shadowBlur = 12;
-        CTR.fillStyle = '#f97316';
-        CTR.beginPath();
-        CTR.ellipse(cx, cy, TILE_SIZE * 0.13, TILE_SIZE * 0.24, 0.2, 0, Math.PI * 2);
-        CTR.fill();
+        if (g.type === 'gem') {
+          CTR.shadowColor = '#fbbf24'; CTR.shadowBlur = 12;
+          CTR.fillStyle = '#f97316';
+          CTR.beginPath();
+          CTR.ellipse(cx, cy, TILE_SIZE * 0.13, TILE_SIZE * 0.24, 0.2, 0, Math.PI * 2);
+          CTR.fill();
 
-        CTR.fillStyle = '#22c55e';
-        CTR.beginPath();
-        CTR.arc(cx - 3, cy - TILE_SIZE * 0.2, 4, 0, Math.PI * 2);
-        CTR.arc(cx + 3, cy - TILE_SIZE * 0.2, 4, 0, Math.PI * 2);
-        CTR.fill();
+          CTR.fillStyle = '#22c55e';
+          CTR.beginPath();
+          CTR.arc(cx - 3, cy - TILE_SIZE * 0.2, 4, 0, Math.PI * 2);
+          CTR.arc(cx + 3, cy - TILE_SIZE * 0.2, 4, 0, Math.PI * 2);
+          CTR.fill();
+        } else if (g.type === 'heart') {
+          CTR.shadowColor = '#f43f5e'; CTR.shadowBlur = 15;
+          CTR.font = `${Math.floor(TILE_SIZE * 0.42)}px sans-serif`;
+          CTR.textAlign = 'center';
+          CTR.textBaseline = 'middle';
+          CTR.fillText('❤️', cx, cy);
+        }
         CTR.restore();
 
-        CTR.fillStyle = '#fbbf24';
+        CTR.fillStyle = g.type === 'gem' ? '#fbbf24' : '#f43f5e';
         CTR.font = '8px Nunito';
         CTR.textAlign = 'center';
         CTR.textBaseline = 'alphabetic';
-        CTR.fillText('Carrot', cx, cy + TILE_SIZE * 0.38);
+        CTR.fillText(g.type === 'gem' ? 'Carrot' : 'Heart', cx, cy + TILE_SIZE * 0.38);
       });
     }
 
