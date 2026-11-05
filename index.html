@@ -246,7 +246,7 @@
       </div>
     </main>
 
-    <!-- Bottom Power-Up / Leap Deck Bar -->
+    <!-- Bottom Power-Up / Leap Deck Bar (With Planned Cards Sequence placed right under powerups and above description bar) -->
     <aside class="w-full bg-slate-900/90 backdrop-blur-md border border-amber-500/40 rounded-2xl p-1.5 flex flex-col shadow-xl shrink-0">
       <div class="flex items-center justify-between pb-0.5 mb-1 border-b border-amber-500/30 px-1">
         <h2 class="font-fredoka text-[11px] sm:text-xs text-amber-400 tracking-wide flex items-center space-x-1.5">
@@ -258,6 +258,14 @@
       <div id="powerup-deck-container" class="flex flex-row overflow-x-auto space-x-1.5 pb-1 pr-1 mb-1 min-h-[46px] items-center">
         <!-- Rendered via JS -->
       </div>
+      
+      <!-- PLANNED CARDS QUEUE (Moved here as requested, above description box and under power-ups & leaps) -->
+      <div class="w-full bg-slate-900/90 backdrop-blur-md px-2 py-1 rounded-xl border border-cyan-500/30 flex items-center justify-between min-h-[38px] shadow-lg mb-1">
+        <div class="flex items-center space-x-1.5 overflow-x-auto py-0.5 px-1 flex-1" id="queue-container">
+          <span id="queue-empty-text" class="text-xs text-slate-500 italic pl-1">Planned cards appear here...</span>
+        </div>
+      </div>
+
       <!-- Blue Description Box at Bottom of Panel -->
       <div id="powerup-desc-box" class="bg-blue-950/80 border border-blue-500/60 rounded-xl p-1 text-[10px] text-blue-200 font-medium leading-snug shadow-inner flex items-center justify-center text-center">
         Hover or select a power-up card to view its description here.
@@ -265,17 +273,12 @@
     </aside>
   </div>
 
-  <!-- Bottom Control Deck & Sequence Bar -->
+  <!-- Bottom Control Deck (Control Buttons & Movement Hand Deck) -->
   <footer class="w-full max-w-4xl z-10 flex flex-col gap-1 shrink-0 pb-1 mt-0">
     
-    <!-- 1. PLANNED CARDS QUEUE (Moved just above Run and Reroll controls) -->
-    <div class="w-full bg-slate-900/90 backdrop-blur-md px-3 py-1 rounded-xl border border-cyan-500/30 flex items-center justify-between min-h-[42px] shadow-lg">
-      <div class="flex items-center space-x-1.5 overflow-x-auto py-0.5 px-1 flex-1" id="queue-container">
-        <span id="queue-empty-text" class="text-xs text-slate-500 italic pl-1">Planned cards appear here...</span>
-      </div>
-      
-      <!-- Control Buttons (Clear, Undo, Reroll, RUN!) -->
-      <div class="flex items-center space-x-1.5 pl-2 border-l border-slate-800 shrink-0">
+    <!-- Control Buttons Row (Clear, Undo, Reroll, RUN!) -->
+    <div class="w-full bg-slate-900/90 backdrop-blur-md px-3 py-1 rounded-xl border border-slate-800 flex items-center justify-end min-h-[38px] shadow-lg">
+      <div class="flex items-center space-x-1.5 shrink-0">
         <button id="undo-btn" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold text-xs rounded-xl transition border border-amber-500/30 disabled:opacity-30 disabled:pointer-events-none" title="Undo last step">
           ↩️
         </button>
@@ -292,7 +295,7 @@
       </div>
     </div>
 
-    <!-- 2. MOVEMENT HAND DECK ROW -->
+    <!-- MOVEMENT HAND DECK ROW -->
     <div class="flex flex-col gap-0.5 w-full">
       <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider px-1 flex justify-between">
         <span>Movement Hand</span>
