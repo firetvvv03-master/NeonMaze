@@ -11,13 +11,15 @@
       user-select: none;
       -webkit-user-select: none;
       box-sizing: border-box;
+      -webkit-touch-callout: none;
     }
     body {
       font-family: 'Nunito', sans-serif;
       background-color: #080c14;
       color: #f3f4f6;
       overflow: hidden;
-      touch-action: manipulation;
+      overscroll-behavior: none;
+      touch-action: none;
     }
     .font-fredoka {
       font-family: 'Fredoka One', cursive;
@@ -45,11 +47,17 @@
     .glow-rose {
       box-shadow: 0 0 20px rgba(244, 63, 94, 0.7);
     }
+    .glow-purple {
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+    }
     .text-glow-cyan {
-      text-shadow: 0 0 10px rgba(56, 189, 248, 0.8);
+      text-shadow: 0 0 12px rgba(56, 189, 248, 0.8);
     }
     .text-glow-rose {
       text-shadow: 0 0 12px rgba(244, 63, 94, 0.9);
+    }
+    .text-glow-amber {
+      text-shadow: 0 0 12px rgba(251, 191, 36, 0.8);
     }
     .card-item {
       transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -59,6 +67,14 @@
     }
     .card-item:active {
       transform: translateY(0) scale(0.95);
+    }
+    /* Menu floating elements & glow pulse */
+    .pulse-glow {
+      animation: pulseGlow 3s infinite ease-in-out;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { filter: drop-shadow(0 0 15px rgba(56, 189, 248, 0.6)); }
+      50% { filter: drop-shadow(0 0 25px rgba(236, 72, 153, 0.8)); }
     }
     /* Screen Shake Animation Class */
     .shake {
@@ -72,17 +88,92 @@
     }
   </style>
 </head>
-<body class="h-screen w-screen flex flex-col justify-between items-center p-2 sm:p-3 bg-slate-950 text-white relative overflow-hidden">
+<body class="h-screen w-screen flex flex-col justify-between items-center px-2 py-0.5 sm:px-3 bg-slate-950 text-white relative overflow-hidden">
 
   <!-- Background Ambient Glows -->
-  <div class="absolute -top-32 -left-32 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
-  <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-fuchsia-500/10 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="absolute -top-32 -left-32 w-96 h-96 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none"></div>
+  <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-fuchsia-500/15 rounded-full blur-3xl pointer-events-none"></div>
+
+  <!-- AD OVERLAY MODAL SIMULATOR -->
+  <div id="ad-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border-2 border-cyan-400 p-6 rounded-3xl max-w-sm w-full text-center shadow-2xl relative">
+      <div class="text-4xl mb-2">📺</div>
+      <h3 class="font-fredoka text-lg text-cyan-300 mb-1">SPONSORED AD</h3>
+      <p id="ad-desc-text" class="text-xs text-slate-300 mb-4">Watching advertisement to unlock trial / continue game...</p>
+      <div class="w-full bg-slate-800 rounded-full h-3 mb-4 overflow-hidden border border-slate-700">
+        <div id="ad-progress-bar" class="bg-gradient-to-r from-cyan-400 to-emerald-400 h-full w-full transition-all duration-1000"></div>
+      </div>
+      <p id="ad-timer-text" class="text-xs font-bold text-amber-400 mb-2">Ad playing... 3s</p>
+    </div>
+  </div>
+
+  <!-- START MENU OVERLAY -->
+  <div id="start-menu-overlay" class="fixed inset-0 bg-slate-950/95 backdrop-blur-xl z-40 flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-slate-900/90 border-2 border-cyan-500/40 rounded-3xl p-6 sm:p-8 flex flex-col items-center text-center shadow-2xl relative overflow-hidden glow-cyan">
+      
+      <!-- Decorative Neon Background Orbs inside modal -->
+      <div class="absolute -top-20 -right-20 w-48 h-48 bg-cyan-500/20 rounded-full blur-2xl pointer-events-none"></div>
+      <div class="absolute -bottom-20 -left-20 w-48 h-48 bg-fuchsia-500/20 rounded-full blur-2xl pointer-events-none"></div>
+
+      <!-- Icon & Title -->
+      <div class="text-6xl mb-3 pulse-glow">🐰⚡</div>
+      <h1 class="font-fredoka text-2xl sm:text-3xl text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-fuchsia-400 text-glow-cyan tracking-wide mb-1">
+        NEON BUNNY
+      </h1>
+      <p class="font-fredoka text-xs sm:text-sm text-amber-400 text-glow-amber tracking-widest uppercase mb-6">
+        ULTIMATE DELUXE RUNNER
+      </p>
+
+      <!-- Main Action Buttons -->
+      <div class="w-full space-y-3.5 mb-6 z-10">
+        <!-- Campaign Mode Button -->
+        <button id="menu-campaign-btn" class="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-cyan-500 to-sky-400 hover:from-cyan-400 hover:to-sky-300 text-slate-950 font-fredoka text-base sm:text-lg uppercase tracking-wider shadow-lg glow-cyan transition transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-between group">
+          <span class="flex items-center space-x-2">
+            <span class="text-xl">🎮</span>
+            <span>Campaign Mode</span>
+          </span>
+          <span class="text-xs bg-slate-950/20 px-2.5 py-1 rounded-lg text-slate-900 font-bold group-hover:bg-slate-950/30">Levels & Bosses</span>
+        </button>
+
+        <!-- Endless Mode Button -->
+        <button id="menu-endless-btn" class="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-fuchsia-500 to-purple-600 hover:from-fuchsia-400 hover:to-purple-500 text-white font-fredoka text-base sm:text-lg uppercase tracking-wider shadow-lg glow-purple transition transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-between group">
+          <span class="flex items-center space-x-2">
+            <span class="text-xl">♾️</span>
+            <span>Endless Mode</span>
+          </span>
+          <span class="text-xs bg-slate-950/30 px-2.5 py-1 rounded-lg text-fuchsia-200 font-bold group-hover:bg-slate-950/40">High Score Rush</span>
+        </button>
+
+        <!-- Shop & Skins Button -->
+        <button id="menu-shop-btn" class="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-fredoka text-base sm:text-lg uppercase tracking-wider shadow-lg glow-amber transition transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-between group">
+          <span class="flex items-center space-x-2">
+            <span class="text-xl">🛒</span>
+            <span>Shop & Skins</span>
+          </span>
+          <span id="menu-carrots-count" class="text-xs bg-slate-950/20 px-2.5 py-1 rounded-lg text-slate-900 font-bold group-hover:bg-slate-950/30">🥕 0</span>
+        </button>
+      </div>
+
+      <!-- Footer Info Row (High Score & Sound Toggle) -->
+      <div class="w-full pt-4 border-t border-slate-800 flex items-center justify-between text-xs z-10">
+        <div class="flex items-center space-x-1.5 text-slate-400 font-bold">
+          <span>🏆 Best Level:</span>
+          <span id="menu-high-score" class="text-amber-400 font-fredoka text-sm">1</span>
+        </div>
+        <button id="menu-sound-btn" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition border border-slate-700 flex items-center space-x-1.5">
+          <span id="menu-sound-icon">🔊</span>
+          <span id="menu-sound-text">Sound ON</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
 
   <!-- Top Header / HUD -->
-  <header class="w-full max-w-5xl flex flex-col gap-1 z-10 bg-slate-900/90 backdrop-blur-md px-3 sm:px-5 py-2 rounded-2xl border border-slate-800 shadow-2xl mb-1">
+  <header class="w-full max-w-4xl flex flex-col gap-1 z-10 bg-slate-900/90 backdrop-blur-md px-3 sm:px-5 py-1.5 rounded-2xl border border-slate-800 shadow-2xl shrink-0 mt-0">
     <div class="flex items-center justify-between">
       <!-- Stats Left -->
-      <div class="flex items-center space-x-2 sm:space-x-5">
+      <div class="flex items-center space-x-2 sm:space-x-4">
         <div class="flex items-center space-x-1" title="Health Points">
           <span class="text-lg sm:text-xl">❤️</span>
           <span id="hp-display" class="font-fredoka text-lg sm:text-xl text-rose-400">3/5</span>
@@ -102,25 +193,18 @@
         </div>
       </div>
 
-      <!-- Title / Highscore -->
-      <div class="text-center hidden md:block">
-        <h1 class="font-fredoka text-lg sm:text-xl text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-fuchsia-400 text-glow-cyan tracking-wide">
-          NEON BUNNY: ULTIMATE DELUXE
-        </h1>
-        <p class="text-[10px] text-slate-400 font-bold">Best Level: <span id="high-score-display" class="text-amber-300">1</span></p>
-      </div>
-
       <!-- Actions Right -->
-      <div class="flex items-center space-x-1.5 sm:space-x-3">
-        <div class="flex items-center space-x-1 bg-slate-800/80 px-2.5 py-1 rounded-xl border border-slate-700" title="Turn Limit">
+      <div class="flex items-center space-x-1.5 sm:space-x-2">
+        <div class="flex items-center space-x-1 bg-slate-800/80 px-2 py-1 rounded-xl border border-slate-700" title="Turn Limit">
           <span class="text-[10px] text-slate-400 font-bold uppercase">Turn</span>
           <span id="turn-display" class="font-fredoka text-cyan-300 text-sm sm:text-base">1/13</span>
         </div>
-        <button id="mode-toggle-btn" class="px-2.5 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-bold transition flex items-center space-x-1" title="Toggle Game Mode">
-          <span>🎮</span>
-          <span id="mode-text">Campaign</span>
+        <!-- Main Menu Return Button -->
+        <button id="main-menu-btn" class="px-2 py-1.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 text-xs font-bold transition flex items-center space-x-1" title="Return to Main Menu">
+          <span>🏠</span>
+          <span class="hidden lg:inline">Menu</span>
         </button>
-        <button id="shop-btn" class="px-2.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold transition flex items-center space-x-1">
+        <button id="shop-btn" class="px-2 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-bold transition flex items-center space-x-1">
           <span>🛒</span>
           <span class="hidden sm:inline">Shop</span>
         </button>
@@ -148,69 +232,72 @@
     </div>
   </header>
 
-  <!-- Central Play Area: Maze Canvas + Side Power-Up Panel -->
-  <div id="game-layout" class="w-full max-w-5xl flex-1 flex flex-row items-center justify-center gap-3 min-h-0 my-1">
+  <!-- Central Play Area: Full-width Maze Canvas & Powerups -->
+  <div id="game-layout" class="w-full max-w-4xl flex flex-col items-center justify-center gap-0.5 my-0 flex-1 min-h-0">
     
     <!-- Game Canvas Container -->
-    <main id="canvas-wrapper" class="relative flex-1 h-full flex items-center justify-center min-w-0">
+    <main id="canvas-wrapper" class="relative w-full flex items-center justify-center min-w-0 flex-1 min-h-0">
       <canvas id="gameCanvas" class="rounded-2xl border-2 border-cyan-500/30 shadow-2xl bg-slate-900/90 max-w-full max-h-full object-contain cursor-pointer"></canvas>
       
       <!-- Status Overlay Banner -->
-      <div id="instruction-tip" class="absolute top-3 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur-md px-4 py-1.5 rounded-full border border-cyan-500/40 text-xs font-semibold text-cyan-200 shadow-lg pointer-events-none transition-all duration-300 flex items-center space-x-2">
+      <div id="instruction-tip" class="absolute top-2 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur-md px-3 py-1 rounded-full border border-cyan-500/40 text-[11px] font-semibold text-cyan-200 shadow-lg pointer-events-none transition-all duration-300 flex items-center space-x-1.5">
         <span id="tip-icon">💡</span>
         <span id="tip-text">Select cards to queue moves, then press RUN!</span>
       </div>
     </main>
 
-    <!-- Side Power-Up Panel -->
-    <aside class="w-40 sm:w-48 bg-slate-900/90 backdrop-blur-md border border-amber-500/40 rounded-2xl p-2.5 flex flex-col shrink-0 h-full max-h-[560px] shadow-xl">
-      <div class="text-center pb-2 mb-2 border-b border-amber-500/30">
-        <h2 class="font-fredoka text-xs sm:text-sm text-amber-400 tracking-wide">⚡ POWER-UPS & LEAPS</h2>
-        <p class="text-[9px] text-slate-400">Click or hover for info</p>
+    <!-- Bottom Power-Up / Leap Deck Bar -->
+    <aside class="w-full bg-slate-900/90 backdrop-blur-md border border-amber-500/40 rounded-2xl p-1.5 flex flex-col shadow-xl shrink-0">
+      <div class="flex items-center justify-between pb-0.5 mb-1 border-b border-amber-500/30 px-1">
+        <h2 class="font-fredoka text-[11px] sm:text-xs text-amber-400 tracking-wide flex items-center space-x-1.5">
+          <span>⚡</span>
+          <span>POWER-UPS & LEAPS</span>
+        </h2>
+        <span class="text-[9px] text-slate-400">Click or hover for info</span>
       </div>
-      <div id="powerup-deck-container" class="flex-1 overflow-y-auto space-y-2 pr-0.5 mb-2">
+      <div id="powerup-deck-container" class="flex flex-row overflow-x-auto space-x-1.5 pb-1 pr-1 mb-1 min-h-[46px] items-center">
         <!-- Rendered via JS -->
       </div>
       <!-- Blue Description Box at Bottom of Panel -->
-      <div id="powerup-desc-box" class="bg-blue-950/80 border border-blue-500/60 rounded-xl p-2 text-[10px] text-blue-200 font-medium leading-snug shadow-inner min-h-[48px] flex items-center justify-center text-center">
+      <div id="powerup-desc-box" class="bg-blue-950/80 border border-blue-500/60 rounded-xl p-1 text-[10px] text-blue-200 font-medium leading-snug shadow-inner flex items-center justify-center text-center">
         Hover or select a power-up card to view its description here.
       </div>
     </aside>
   </div>
 
   <!-- Bottom Control Deck & Sequence Bar -->
-  <footer class="w-full max-w-5xl z-10 flex flex-col gap-1.5">
+  <footer class="w-full max-w-4xl z-10 flex flex-col gap-1 shrink-0 pb-1 mt-0">
     
-    <!-- Movement Queue Preview Bar -->
-    <div class="w-full bg-slate-900/90 backdrop-blur-md p-2 rounded-xl border border-slate-800 flex items-center justify-between min-h-[52px]">
-      <div class="flex items-center space-x-1.5 overflow-x-auto py-1 px-1 flex-1" id="queue-container">
-        <span id="queue-empty-text" class="text-xs text-slate-500 italic pl-2">Planned cards appear here...</span>
+    <!-- 1. PLANNED CARDS QUEUE (Moved just above Run and Reroll controls) -->
+    <div class="w-full bg-slate-900/90 backdrop-blur-md px-3 py-1 rounded-xl border border-cyan-500/30 flex items-center justify-between min-h-[42px] shadow-lg">
+      <div class="flex items-center space-x-1.5 overflow-x-auto py-0.5 px-1 flex-1" id="queue-container">
+        <span id="queue-empty-text" class="text-xs text-slate-500 italic pl-1">Planned cards appear here...</span>
       </div>
       
-      <!-- Control Buttons -->
+      <!-- Control Buttons (Clear, Undo, Reroll, RUN!) -->
       <div class="flex items-center space-x-1.5 pl-2 border-l border-slate-800 shrink-0">
-        <button id="undo-btn" class="px-2.5 py-2 bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold text-xs rounded-xl transition border border-amber-500/30 disabled:opacity-30 disabled:pointer-events-none" title="Undo last step">
+        <button id="undo-btn" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold text-xs rounded-xl transition border border-amber-500/30 disabled:opacity-30 disabled:pointer-events-none" title="Undo last step">
           ↩️
         </button>
-        <button id="clear-btn" class="px-2.5 py-2 bg-slate-800 hover:bg-slate-700 text-rose-400 font-bold text-xs rounded-xl transition border border-rose-500/30 disabled:opacity-30 disabled:pointer-events-none">
+        <button id="clear-btn" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-rose-400 font-bold text-xs rounded-xl transition border border-rose-500/30 disabled:opacity-30 disabled:pointer-events-none">
           Clear
         </button>
-        <button id="reroll-btn" class="px-3 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-extrabold text-xs rounded-xl shadow-md transition transform active:scale-95 flex items-center space-x-1 disabled:opacity-40 disabled:pointer-events-none">
+        <button id="reroll-btn" class="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-extrabold text-xs rounded-xl shadow-md transition transform active:scale-95 flex items-center space-x-1 disabled:opacity-40 disabled:pointer-events-none">
           <span>🎲</span>
           <span id="reroll-text">Reroll (1)</span>
         </button>
-        <button id="execute-btn" class="px-4 sm:px-6 py-2 bg-gradient-to-r from-cyan-400 to-emerald-400 hover:from-cyan-300 hover:to-emerald-300 text-slate-950 font-fredoka text-xs sm:text-sm uppercase tracking-wider rounded-xl shadow-lg glow-cyan transition transform active:scale-95 disabled:opacity-30 disabled:pointer-events-none">
+        <button id="execute-btn" class="px-4 sm:px-5 py-1.5 bg-gradient-to-r from-cyan-400 to-emerald-400 hover:from-cyan-300 hover:to-emerald-300 text-slate-950 font-fredoka text-xs sm:text-sm uppercase tracking-wider rounded-xl shadow-lg glow-cyan transition transform active:scale-95 disabled:opacity-30 disabled:pointer-events-none">
           RUN! 🚀
         </button>
       </div>
     </div>
 
-    <!-- Movement Hand Deck Row -->
-    <div class="flex flex-col gap-1 w-full">
+    <!-- 2. MOVEMENT HAND DECK ROW -->
+    <div class="flex flex-col gap-0.5 w-full">
       <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider px-1 flex justify-between">
         <span>Movement Hand</span>
       </div>
-      <div class="grid grid-cols-6 sm:grid-cols-7 gap-1.5 sm:gap-2 w-full" id="deck-container">
+      <div class="grid grid-cols-6 sm:grid-cols-7 gap-1 sm:gap-1.5 w-full" id="deck-container">
         <!-- Generated via JS -->
       </div>
     </div>
@@ -313,79 +400,79 @@
     let isExecuting = false;
     let soundEnabled = true;
     let gameMode = 'campaign'; // 'campaign' or 'endless'
+    let continueAdCount = 0; // Max 3 times per run
 
     let isBossLevel = false;
     let boss = null; 
 
     let highScore = parseInt(localStorage.getItem('neon_bunny_highscore_ultimate') || '1');
-    document.getElementById('high-score-display').innerText = highScore;
 
     const SKINS = [
       // --- BUNNIES (20 Styles) ---
-      { id: 'cyan', name: 'Neon Cyan Bunny', category: 'bunny', type: 'bunny', color: '#00e5ff', earInner: '#a5f3fc', blush: '#38bdf8', unlocked: true },
-      { id: 'pink', name: 'Cyber Pink Bunny', category: 'bunny', type: 'bunny', color: '#ec4899', earInner: '#fbcfe8', blush: '#f43f5e', unlocked: true },
-      { id: 'gold', name: 'Golden Bunny', category: 'bunny', type: 'bunny', color: '#f59e0b', earInner: '#fef08a', blush: '#fbbf24', unlocked: true },
-      { id: 'matrix', name: 'Matrix Emerald', category: 'bunny', type: 'bunny', color: '#10b981', earInner: '#a7f3d0', blush: '#34d399', unlocked: true },
-      { id: 'sakura', name: 'Sakura Blossom', category: 'bunny', type: 'bunny', color: '#fda4af', earInner: '#ffe4e6', blush: '#fb7185', unlocked: true },
-      { id: 'lavender', name: 'Lavender Dream', category: 'bunny', type: 'bunny', color: '#c084fc', earInner: '#f3e8ff', blush: '#a855f7', unlocked: true },
-      { id: 'mint', name: 'Frosty Mint', category: 'bunny', type: 'bunny', color: '#2dd4bf', earInner: '#ccfbf1', blush: '#14b8a6', unlocked: true },
-      { id: 'sunset', name: 'Sunset Orange', category: 'bunny', type: 'bunny', color: '#fb923c', earInner: '#ffedd5', blush: '#f97316', unlocked: true },
-      { id: 'ruby', name: 'Ruby Heart', category: 'bunny', type: 'bunny', color: '#e11d48', earInner: '#ffe4e6', blush: '#be123c', unlocked: true },
-      { id: 'galaxy', name: 'Cosmic Galaxy', category: 'bunny', type: 'bunny', color: '#6366f1', earInner: '#e0e7ff', blush: '#4f46e5', unlocked: true },
-      { id: 'cobalt', name: 'Cobalt Runner', category: 'bunny', type: 'bunny', color: '#2563eb', earInner: '#bfdbfe', blush: '#1d4ed8', unlocked: true },
-      { id: 'lime', name: 'Cyber Lime', category: 'bunny', type: 'bunny', color: '#84cc16', earInner: '#ecfccb', blush: '#65a30d', unlocked: true },
-      { id: 'teal', name: 'Electric Teal', category: 'bunny', type: 'bunny', color: '#06b6d4', earInner: '#cffafe', blush: '#0891b2', unlocked: true },
-      { id: 'pearl', name: 'Holographic Pearl', category: 'bunny', type: 'bunny', color: '#f8fafc', earInner: '#e2e8f0', blush: '#cbd5e1', unlocked: true },
-      { id: 'magenta', name: 'Vaporwave Magenta', category: 'bunny', type: 'bunny', color: '#db2777', earInner: '#fce7f3', blush: '#be185d', unlocked: true },
-      { id: 'slime', name: 'Toxic Slime', category: 'bunny', type: 'bunny', color: '#65a30d', earInner: '#ecfccb', blush: '#4d7c0f', unlocked: true },
-      { id: 'amethyst', name: 'Amethyst Spark', category: 'bunny', type: 'bunny', color: '#7c3aed', earInner: '#ede9fe', blush: '#6d28d9', unlocked: true },
-      { id: 'blade', name: 'Crimson Blade', category: 'bunny', type: 'bunny', color: '#dc2626', earInner: '#fee2e2', blush: '#b91c1c', unlocked: true },
-      { id: 'tangerine', name: 'Tangerine Glow', category: 'bunny', type: 'bunny', color: '#ea580c', earInner: '#ffedd5', blush: '#c2410c', unlocked: true },
-      { id: 'obsidian', name: 'Midnight Obsidian', category: 'bunny', type: 'bunny', color: '#1e293b', earInner: '#475569', blush: '#0f172a', unlocked: true },
+      { id: 'cyan', name: 'Neon Cyan Bunny', category: 'bunny', type: 'bunny', color: '#00e5ff', earInner: '#a5f3fc', blush: '#38bdf8', purchaseType: 'carrot', cost: 50, unlocked: true },
+      { id: 'pink', name: 'Cyber Pink Bunny', category: 'bunny', type: 'bunny', color: '#ec4899', earInner: '#fbcfe8', blush: '#f43f5e', purchaseType: 'carrot', cost: 75, unlocked: false },
+      { id: 'gold', name: 'Golden Bunny', category: 'bunny', type: 'bunny', color: '#f59e0b', earInner: '#fef08a', blush: '#fbbf24', purchaseType: 'carrot', cost: 100, unlocked: false },
+      { id: 'matrix', name: 'Matrix Emerald', category: 'bunny', type: 'bunny', color: '#10b981', earInner: '#a7f3d0', blush: '#34d399', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'sakura', name: 'Sakura Blossom', category: 'bunny', type: 'bunny', color: '#fda4af', earInner: '#ffe4e6', blush: '#fb7185', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'lavender', name: 'Lavender Dream', category: 'bunny', type: 'bunny', color: '#c084fc', earInner: '#f3e8ff', blush: '#a855f7', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'mint', name: 'Frosty Mint', category: 'bunny', type: 'bunny', color: '#2dd4bf', earInner: '#ccfbf1', blush: '#14b8a6', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'sunset', name: 'Sunset Orange', category: 'bunny', type: 'bunny', color: '#fb923c', earInner: '#ffedd5', blush: '#f97316', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'ruby', name: 'Ruby Heart', category: 'bunny', type: 'bunny', color: '#e11d48', earInner: '#ffe4e6', blush: '#be123c', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'galaxy', name: 'Cosmic Galaxy', category: 'bunny', type: 'bunny', color: '#6366f1', earInner: '#e0e7ff', blush: '#4f46e5', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'cobalt', name: 'Cobalt Runner', category: 'bunny', type: 'bunny', color: '#2563eb', earInner: '#bfdbfe', blush: '#1d4ed8', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'lime', name: 'Cyber Lime', category: 'bunny', type: 'bunny', color: '#84cc16', earInner: '#ecfccb', blush: '#65a30d', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'teal', name: 'Electric Teal', category: 'bunny', type: 'bunny', color: '#06b6d4', earInner: '#cffafe', blush: '#0891b2', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'pearl', name: 'Holographic Pearl', category: 'bunny', type: 'bunny', color: '#f8fafc', earInner: '#e2e8f0', blush: '#cbd5e1', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'magenta', name: 'Vaporwave Magenta', category: 'bunny', type: 'bunny', color: '#db2777', earInner: '#fce7f3', blush: '#be185d', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'slime', name: 'Toxic Slime', category: 'bunny', type: 'bunny', color: '#65a30d', earInner: '#ecfccb', blush: '#4d7c0f', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'amethyst', name: 'Amethyst Spark', category: 'bunny', type: 'bunny', color: '#7c3aed', earInner: '#ede9fe', blush: '#6d28d9', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'blade', name: 'Crimson Blade', category: 'bunny', type: 'bunny', color: '#dc2626', earInner: '#fee2e2', blush: '#b91c1c', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'tangerine', name: 'Tangerine Glow', category: 'bunny', type: 'bunny', color: '#ea580c', earInner: '#ffedd5', blush: '#c2410c', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'obsidian', name: 'Midnight Obsidian', category: 'bunny', type: 'bunny', color: '#1e293b', earInner: '#475569', blush: '#0f172a', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
 
       // --- CAT & FRIENDS (20 Styles) ---
-      { id: 'cat_kitty', name: 'Neon Kitty', category: 'cat_friends', type: 'cat', color: '#fb7185', earInner: '#fbcfe8', blush: '#f43f5e', unlocked: true },
-      { id: 'dog_puppy', name: 'Sparkle Puppy', category: 'cat_friends', type: 'dog', color: '#a16207', earInner: '#fef08a', blush: '#ca8a04', unlocked: true },
-      { id: 'hamster_cheek', name: 'Chubby Hamster', category: 'cat_friends', type: 'hamster', color: '#fb923c', earInner: '#ffedd5', blush: '#f97316', unlocked: true },
-      { id: 'duck_quack', name: 'Sunny Duck', category: 'cat_friends', type: 'duck', color: '#facc15', earInner: '#fef9c3', blush: '#eab308', unlocked: true },
-      { id: 'penguin_ice', name: 'Frosty Penguin', category: 'cat_friends', type: 'penguin', color: '#0284c7', earInner: '#e0f2fe', blush: '#0284c7', unlocked: true },
-      { id: 'fox_kitsune', name: 'Neon Fox', category: 'cat_friends', type: 'fox', color: '#f97316', earInner: '#fed7aa', blush: '#ea580c', unlocked: true },
-      { id: 'cat_cyber', name: 'Cyber Neko', category: 'cat_friends', type: 'cat', color: '#38bdf8', earInner: '#e0f2fe', blush: '#0284c7', unlocked: true },
-      { id: 'dog_cyber', name: 'Cyber Hound', category: 'cat_friends', type: 'dog', color: '#94a3b8', earInner: '#f1f5f9', blush: '#64748b', unlocked: true },
-      { id: 'owl_wise', name: 'Neon Owl', category: 'cat_friends', type: 'owl', color: '#8b5cf6', earInner: '#ede9fe', blush: '#7c3aed', unlocked: true },
-      { id: 'mouse_squeak', name: 'Pico Mouse', category: 'cat_friends', type: 'mouse', color: '#cbd5e1', earInner: '#f8fafc', blush: '#94a3b8', unlocked: true },
-      { id: 'calico', name: 'Neon Calico', category: 'cat_friends', type: 'cat', color: '#ea580c', earInner: '#fed7aa', blush: '#c2410c', unlocked: true },
-      { id: 'panther', name: 'Cyber Panther', category: 'cat_friends', type: 'cat', color: '#0f172a', earInner: '#334155', blush: '#020617', unlocked: true },
-      { id: 'husky', name: 'Electric Husky', category: 'cat_friends', type: 'dog', color: '#38bdf8', earInner: '#bae6fd', blush: '#0284c7', unlocked: true },
-      { id: 'retriever', name: 'Golden Retriever', category: 'cat_friends', type: 'dog', color: '#d97706', earInner: '#fde68a', blush: '#b45309', unlocked: true },
-      { id: 'siamese', name: 'Neon Siamese', category: 'cat_friends', type: 'cat', color: '#a855f7', earInner: '#e9d5ff', blush: '#9333ea', unlocked: true },
-      { id: 'raccoon_cyber', name: 'Cyber Raccoon', category: 'cat_friends', type: 'raccoon', color: '#64748b', earInner: '#cbd5e1', blush: '#475569', unlocked: true },
-      { id: 'hamster_laser', name: 'Laser Hamster', category: 'cat_friends', type: 'hamster', color: '#f43f5e', earInner: '#ffe4e6', blush: '#e11d48', unlocked: true },
-      { id: 'parrot', name: 'Pixel Parrot', category: 'cat_friends', type: 'duck', color: '#10b981', earInner: '#a7f3d0', blush: '#059669', unlocked: true },
-      { id: 'axolotl', name: 'Neon Axolotl', category: 'cat_friends', type: 'mouse', color: '#f472b6', earInner: '#fbcfe8', blush: '#ec4899', unlocked: true },
-      { id: 'bat', name: 'Shadow Bat', category: 'cat_friends', type: 'owl', color: '#312e81', earInner: '#4338ca', blush: '#1e1b4b', unlocked: true },
+      { id: 'cat_kitty', name: 'Neon Kitty', category: 'cat_friends', type: 'cat', color: '#fb7185', earInner: '#fbcfe8', blush: '#f43f5e', purchaseType: 'carrot', cost: 50, unlocked: false },
+      { id: 'dog_puppy', name: 'Sparkle Puppy', category: 'cat_friends', type: 'dog', color: '#a16207', earInner: '#fef08a', blush: '#ca8a04', purchaseType: 'carrot', cost: 75, unlocked: false },
+      { id: 'hamster_cheek', name: 'Chubby Hamster', category: 'cat_friends', type: 'hamster', color: '#fb923c', earInner: '#ffedd5', blush: '#f97316', purchaseType: 'carrot', cost: 100, unlocked: false },
+      { id: 'duck_quack', name: 'Sunny Duck', category: 'cat_friends', type: 'duck', color: '#facc15', earInner: '#fef9c3', blush: '#eab308', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'penguin_ice', name: 'Frosty Penguin', category: 'cat_friends', type: 'penguin', color: '#0284c7', earInner: '#e0f2fe', blush: '#0284c7', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'fox_kitsune', name: 'Neon Fox', category: 'cat_friends', type: 'fox', color: '#f97316', earInner: '#fed7aa', blush: '#ea580c', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'cat_cyber', name: 'Cyber Neko', category: 'cat_friends', type: 'cat', color: '#38bdf8', earInner: '#e0f2fe', blush: '#0284c7', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'dog_cyber', name: 'Cyber Hound', category: 'cat_friends', type: 'dog', color: '#94a3b8', earInner: '#f1f5f9', blush: '#64748b', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'owl_wise', name: 'Neon Owl', category: 'cat_friends', type: 'owl', color: '#8b5cf6', earInner: '#ede9fe', blush: '#7c3aed', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'mouse_squeak', name: 'Pico Mouse', category: 'cat_friends', type: 'mouse', color: '#cbd5e1', earInner: '#f8fafc', blush: '#94a3b8', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'calico', name: 'Neon Calico', category: 'cat_friends', type: 'cat', color: '#ea580c', earInner: '#fed7aa', blush: '#c2410c', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'panther', name: 'Cyber Panther', category: 'cat_friends', type: 'cat', color: '#0f172a', earInner: '#334155', blush: '#020617', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'husky', name: 'Electric Husky', category: 'cat_friends', type: 'dog', color: '#38bdf8', earInner: '#bae6fd', blush: '#0284c7', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'retriever', name: 'Golden Retriever', category: 'cat_friends', type: 'dog', color: '#d97706', earInner: '#fde68a', blush: '#b45309', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'siamese', name: 'Neon Siamese', category: 'cat_friends', type: 'cat', color: '#a855f7', earInner: '#e9d5ff', blush: '#9333ea', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'raccoon_cyber', name: 'Cyber Raccoon', category: 'cat_friends', type: 'raccoon', color: '#64748b', earInner: '#cbd5e1', blush: '#475569', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'hamster_laser', name: 'Laser Hamster', category: 'cat_friends', type: 'hamster', color: '#f43f5e', earInner: '#ffe4e6', blush: '#e11d48', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'parrot', name: 'Pixel Parrot', category: 'cat_friends', type: 'duck', color: '#10b981', earInner: '#a7f3d0', blush: '#059669', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'axolotl', name: 'Neon Axolotl', category: 'cat_friends', type: 'mouse', color: '#f472b6', earInner: '#fbcfe8', blush: '#ec4899', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'bat', name: 'Shadow Bat', category: 'cat_friends', type: 'owl', color: '#312e81', earInner: '#4338ca', blush: '#1e1b4b', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
 
       // --- WILD & FOREST (20 Styles) ---
-      { id: 'bear_teddy', name: 'Honey Bear', category: 'wild', type: 'bear', color: '#d97706', earInner: '#fde68a', blush: '#b45309', unlocked: true },
-      { id: 'panda_bamboo', name: 'Cyber Panda', category: 'wild', type: 'panda', color: '#334155', earInner: '#cbd5e1', blush: '#64748b', unlocked: true },
-      { id: 'koala_eucaly', name: 'Dreamy Koala', category: 'wild', type: 'koala', color: '#64748b', earInner: '#cbd5e1', blush: '#475569', unlocked: true },
-      { id: 'frog_lily', name: 'Neon Frog', category: 'wild', type: 'frog', color: '#22c55e', earInner: '#bbf7d0', blush: '#16a34a', unlocked: true },
-      { id: 'tiger_stripe', name: 'Neon Tiger', category: 'wild', type: 'tiger', color: '#f97316', earInner: '#ffedd5', blush: '#c2410c', unlocked: true },
-      { id: 'lion_mane', name: 'Solar Lion', category: 'wild', type: 'lion', color: '#eab308', earInner: '#fef08a', blush: '#ca8a04', unlocked: true },
-      { id: 'wolf_shadow', name: 'Shadow Wolf', category: 'wild', type: 'wolf', color: '#475569', earInner: '#94a3b8', blush: '#334155', unlocked: true },
-      { id: 'raccoon_bandit', name: 'Masked Raccoon', category: 'wild', type: 'raccoon', color: '#64748b', earInner: '#cbd5e1', blush: '#475569', unlocked: true },
-      { id: 'hedgehog_spike', name: 'Neon Hedgehog', category: 'wild', type: 'hedgehog', color: '#a16207', earInner: '#fef08a', blush: '#854d0e', unlocked: true },
-      { id: 'squirrel_nut', name: 'Cyber Squirrel', category: 'wild', type: 'squirrel', color: '#d97706', earInner: '#ffedd5', blush: '#b45309', unlocked: true },
-      { id: 'grizzly', name: 'Cyber Grizzly', category: 'wild', type: 'bear', color: '#78350f', earInner: '#92400e', blush: '#451a03', unlocked: true },
-      { id: 'moose', name: 'Neon Moose', category: 'wild', type: 'deer', color: '#9a3412', earInner: '#c2410c', blush: '#7c2d12', unlocked: true },
-      { id: 'bison', name: 'Electric Bison', category: 'wild', type: 'bull', color: '#451a03', earInner: '#78350f', blush: '#292524', unlocked: true },
-      { id: 'stag', name: 'Crystal Stag', category: 'wild', type: 'deer', color: '#0284c7', earInner: '#7dd3fc', blush: '#0369a1', unlocked: true },
-      { id: 'toad', name: 'Bioluminescent Toad', category: 'wild', type: 'frog', color: '#15803d', earInner: '#4ade80', blush: '#166534', unlocked: true },
-      { id: 'panther_wild', name: 'Shadow Panther', category: 'wild', type: 'wolf', color: '#172554', earInner: '#1e3a8a', blush: '#0f172a', unlocked: true },
-      { id: 'boar', name: 'Magma Boar', category: 'wild', type: 'bear', color: '#7c2d12', earInner: '#ea580c', blush: '#431407', unlocked: true },
-      { id: 'lynx', name: 'Glacial Lynx', category: 'wild', type: 'cat', color: '#0369a1', earInner: '#38bdf8', blush: '#075985', unlocked: true },
-      { id: 'eagle', name: 'Storm Eagle', category: 'wild', type: 'owl', color: '#334155', earInner: '#64748b', blush: '#1e293b', unlocked: true },
-      { id: 'fox_void', name: 'Void Fox', category: 'wild', type: 'fox', color: '#581c87', earInner: '#c084fc', blush: '#3b0764', unlocked: true }
+      { id: 'bear_teddy', name: 'Honey Bear', category: 'wild', type: 'bear', color: '#d97706', earInner: '#fde68a', blush: '#b45309', purchaseType: 'carrot', cost: 50, unlocked: false },
+      { id: 'panda_bamboo', name: 'Cyber Panda', category: 'wild', type: 'panda', color: '#334155', earInner: '#cbd5e1', blush: '#64748b', purchaseType: 'carrot', cost: 75, unlocked: false },
+      { id: 'koala_eucaly', name: 'Dreamy Koala', category: 'wild', type: 'koala', color: '#64748b', earInner: '#cbd5e1', blush: '#475569', purchaseType: 'carrot', cost: 100, unlocked: false },
+      { id: 'frog_lily', name: 'Neon Frog', category: 'wild', type: 'frog', color: '#22c55e', earInner: '#bbf7d0', blush: '#16a34a', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'tiger_stripe', name: 'Neon Tiger', category: 'wild', type: 'tiger', color: '#f97316', earInner: '#ffedd5', blush: '#c2410c', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'lion_mane', name: 'Solar Lion', category: 'wild', type: 'lion', color: '#eab308', earInner: '#fef08a', blush: '#ca8a04', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'wolf_shadow', name: 'Shadow Wolf', category: 'wild', type: 'wolf', color: '#475569', earInner: '#94a3b8', blush: '#334155', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'raccoon_bandit', name: 'Masked Raccoon', category: 'wild', type: 'raccoon', color: '#64748b', earInner: '#cbd5e1', blush: '#475569', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'hedgehog_spike', name: 'Neon Hedgehog', category: 'wild', type: 'hedgehog', color: '#a16207', earInner: '#fef08a', blush: '#854d0e', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'squirrel_nut', name: 'Cyber Squirrel', category: 'wild', type: 'squirrel', color: '#d97706', earInner: '#ffedd5', blush: '#b45309', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'grizzly', name: 'Cyber Grizzly', category: 'wild', type: 'bear', color: '#78350f', earInner: '#92400e', blush: '#451a03', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'moose', name: 'Neon Moose', category: 'wild', type: 'deer', color: '#9a3412', earInner: '#c2410c', blush: '#7c2d12', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'bison', name: 'Electric Bison', category: 'wild', type: 'bull', color: '#451a03', earInner: '#78350f', blush: '#292524', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'stag', name: 'Crystal Stag', category: 'wild', type: 'deer', color: '#0284c7', earInner: '#7dd3fc', blush: '#0369a1', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'toad', name: 'Bioluminescent Toad', category: 'wild', type: 'frog', color: '#15803d', earInner: '#4ade80', blush: '#166534', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'panther_wild', name: 'Shadow Panther', category: 'wild', type: 'wolf', color: '#172554', earInner: '#1e3a8a', blush: '#0f172a', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'boar', name: 'Magma Boar', category: 'wild', type: 'bear', color: '#7c2d12', earInner: '#ea580c', blush: '#431407', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'lynx', name: 'Glacial Lynx', category: 'wild', type: 'cat', color: '#0369a1', earInner: '#38bdf8', blush: '#075985', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'eagle', name: 'Storm Eagle', category: 'wild', type: 'owl', color: '#334155', earInner: '#64748b', blush: '#1e293b', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
+      { id: 'fox_void', name: 'Void Fox', category: 'wild', type: 'fox', color: '#581c87', earInner: '#c084fc', blush: '#3b0764', purchaseType: 'trial', unlocked: false, trialExpires: 0 }
     ];
     let activeSkin = SKINS[0];
     let activeSkinCategory = 'bunny';
@@ -463,6 +550,10 @@
     ];
 
     let particles = [];
+
+    // Prevent default gesture panning/zooming/scrolling on mobile touch hold
+    document.addEventListener('touchmove', (e) => { e.preventDefault(); }, { passive: false });
+    document.addEventListener('gesturestart', (e) => { e.preventDefault(); });
 
     /* =========================================================================
        2. SYNTHESIZED SOUND SYSTEM (Web Audio API)
@@ -593,7 +684,40 @@
     }
 
     /* =========================================================================
-       3. MAZE GENERATION & LEVEL SETUP
+       3. AD SIMULATOR HELPER
+       ========================================================================= */
+    function showAdModal(descMessage, onComplete) {
+      const adModal = document.getElementById('ad-modal');
+      const descText = document.getElementById('ad-desc-text');
+      const timerText = document.getElementById('ad-timer-text');
+      const progressBar = document.getElementById('ad-progress-bar');
+
+      descText.innerText = descMessage;
+      adModal.classList.remove('hidden');
+      progressBar.style.width = '100%';
+
+      let timeLeft = 3;
+      timerText.innerText = `Ad playing... ${timeLeft}s`;
+
+      const interval = setInterval(() => {
+        timeLeft--;
+        if (timeLeft > 0) {
+          timerText.innerText = `Ad playing... ${timeLeft}s`;
+          progressBar.style.width = `${(timeLeft / 3) * 100}%`;
+        } else {
+          clearInterval(interval);
+          progressBar.style.width = '0%';
+          timerText.innerText = `Ad finished! Reward unlocked!`;
+          setTimeout(() => {
+            adModal.classList.add('hidden');
+            if (onComplete) onComplete();
+          }, 600);
+        }
+      }, 1000);
+    }
+
+    /* =========================================================================
+       4. MAZE GENERATION & LEVEL SETUP
        ========================================================================= */
     function initLevel() {
       isBossLevel = (gameMode === 'campaign' && level % 4 === 0);
@@ -604,7 +728,6 @@
       }
       resizeCanvas();
 
-      // Set turn limits based on game type
       if (isBossLevel) {
         const bossNum = Math.floor(level / 4);
         maxTurnLimit = 20 + (bossNum - 1);
@@ -760,13 +883,11 @@
         keyPos = openTiles.pop();
       }
 
-      // Spawn Floor Hearts (1-2 per round)
       const heartCount = Math.floor(Math.random() * 2) + 1;
       for (let i = 0; i < heartCount && openTiles.length > 0; i++) {
         collectibles.push({ ...openTiles.pop(), type: 'heart' });
       }
 
-      // Spawn Laser Tripwires
       const tripwireCount = Math.min(5, 2 + Math.floor(level * 0.5));
       for (let i = 0; i < tripwireCount && openTiles.length > 0; i++) {
         tripwires.push({ ...openTiles.pop(), active: Math.random() < 0.5 });
@@ -854,7 +975,63 @@
     }
 
     /* =========================================================================
-       4. UI, DECK & QUEUE RENDERERS
+       5. START MENU & UI EVENT HANDLERS
+       ========================================================================= */
+    function showStartMenu() {
+      updateMenuUI();
+      document.getElementById('start-menu-overlay').classList.remove('hidden');
+    }
+
+    function hideStartMenu() {
+      document.getElementById('start-menu-overlay').classList.add('hidden');
+    }
+
+    function updateMenuUI() {
+      document.getElementById('menu-high-score').innerText = highScore;
+      document.getElementById('menu-carrots-count').innerText = `🥕 ${gems}`;
+      document.getElementById('menu-sound-icon').innerText = soundEnabled ? '🔊' : '🔇';
+      document.getElementById('menu-sound-text').innerText = soundEnabled ? 'Sound ON' : 'Sound OFF';
+    }
+
+    function startGameWithMode(mode) {
+      gameMode = mode;
+      level = 1;
+      hp = maxHp;
+      gems = 0;
+      turnCount = 1;
+      rerolls = 1;
+      hasShield = false;
+      freezeTurns = 0;
+      mirrorClone = null;
+      plasmaTurns = 0;
+      continueAdCount = 0;
+      hideStartMenu();
+      initLevel();
+      playSound('powerup');
+    }
+
+    document.getElementById('menu-campaign-btn').onclick = () => startGameWithMode('campaign');
+    document.getElementById('menu-endless-btn').onclick = () => startGameWithMode('endless');
+    document.getElementById('menu-shop-btn').onclick = () => {
+      playSound('select');
+      renderSkinsGrid();
+      document.getElementById('shop-modal').classList.remove('hidden');
+    };
+    
+    document.getElementById('menu-sound-btn').onclick = () => {
+      soundEnabled = !soundEnabled;
+      const soundBtn = document.getElementById('sound-btn');
+      if (soundBtn) soundBtn.innerText = soundEnabled ? '🔊' : '🔇';
+      updateMenuUI();
+    };
+
+    document.getElementById('main-menu-btn').onclick = () => {
+      playSound('select');
+      showStartMenu();
+    };
+
+    /* =========================================================================
+       6. UI, DECK & QUEUE RENDERERS
        ========================================================================= */
     function renderDeckUI() {
       const deckContainer = document.getElementById('deck-container');
@@ -869,7 +1046,7 @@
         }`;
         btn.onclick = () => selectCard(card);
         btn.innerHTML = `
-          <span class="text-sm sm:text-xl mb-0.5">${card.icon}</span>
+          <span class="text-sm sm:text-lg mb-0.5">${card.icon}</span>
           <span class="text-[9px] sm:text-[10px] font-bold text-cyan-200 tracking-tight leading-tight">${card.label}</span>
         `;
         deckContainer.appendChild(btn);
@@ -881,7 +1058,7 @@
       powerupDeck.forEach((card) => {
         const isJump = card.type === 'jump';
         const btn = document.createElement('button');
-        btn.className = `card-item w-full p-2 rounded-xl flex items-center space-x-2 border transition shadow-md ${
+        btn.className = `card-item p-1.5 rounded-xl flex flex-col items-center justify-center border transition shadow-md shrink-0 w-26 sm:w-30 ${
           card.used 
             ? 'opacity-20 border-slate-800 bg-slate-900 pointer-events-none' 
             : isJump 
@@ -897,11 +1074,11 @@
         };
 
         btn.innerHTML = `
-          <span class="text-lg">${card.icon}</span>
-          <div class="text-left leading-tight">
-            <p class="text-[10px] font-bold ${isJump ? 'text-cyan-300' : 'text-amber-300'}">${card.label}</p>
-            <p class="text-[8px] text-slate-400 uppercase">${isJump ? 'Leap Move' : 'Power-Up'}</p>
+          <div class="flex items-center space-x-1">
+            <span class="text-xs sm:text-sm">${card.icon}</span>
+            <span class="text-[9px] sm:text-[10px] font-bold ${isJump ? 'text-cyan-300' : 'text-amber-300'} truncate">${card.label}</span>
           </div>
+          <span class="text-[8px] text-slate-400 uppercase">${isJump ? 'Leap' : 'Power'}</span>
         `;
         powerContainer.appendChild(btn);
       });
@@ -923,7 +1100,7 @@
       if (plannedQueue.length === 0) {
         const emptyText = document.createElement('span');
         emptyText.id = 'queue-empty-text';
-        emptyText.className = 'text-xs text-slate-500 italic pl-2';
+        emptyText.className = 'text-xs text-slate-500 italic pl-1';
         emptyText.innerText = 'Planned cards appear here...';
         queueContainer.appendChild(emptyText);
 
@@ -1002,20 +1179,14 @@
     document.getElementById('restart-btn').onclick = () => {
       level = 1; hp = maxHp; gems = 0; turnCount = 1; rerolls = 1;
       hasShield = false; freezeTurns = 0; mirrorClone = null; plasmaTurns = 0;
+      continueAdCount = 0;
       initLevel();
     };
 
     document.getElementById('sound-btn').onclick = (e) => {
       soundEnabled = !soundEnabled;
       e.target.innerText = soundEnabled ? '🔊' : '🔇';
-    };
-
-    document.getElementById('mode-toggle-btn').onclick = () => {
-      gameMode = gameMode === 'campaign' ? 'endless' : 'campaign';
-      document.getElementById('mode-text').innerText = gameMode === 'campaign' ? 'Campaign' : 'Endless';
-      level = 1;
-      hp = maxHp;
-      initLevel();
+      updateMenuUI();
     };
 
     function updateHUD() {
@@ -1029,6 +1200,8 @@
       const shieldInd = document.getElementById('shield-indicator');
       if (hasShield) shieldInd.classList.remove('hidden'), shieldInd.classList.add('flex');
       else shieldInd.classList.add('hidden'), shieldInd.classList.remove('flex');
+
+      updateMenuUI();
     }
 
     function updateBossHUD() {
@@ -1046,7 +1219,7 @@
     }
 
     /* =========================================================================
-       5. MOVEMENT EXECUTION & GAME LOGIC
+       7. MOVEMENT EXECUTION & GAME LOGIC
        ========================================================================= */
     async function executePlayerMoves() {
       isExecuting = true;
@@ -1164,7 +1337,6 @@
         });
       }
 
-      // Toggle Laser Tripwire state every turn
       tripwires.forEach(tw => tw.active = !tw.active);
 
       if (freezeTurns <= 0) {
@@ -1654,7 +1826,7 @@
     }
 
     /* =========================================================================
-       6. CARROT SHOP & CATEGORIZED SKINS (Max HP Cap = 5)
+       8. CARROT SHOP & CATEGORIZED SKINS WITH 3-DAY TRIAL & ADS
        ========================================================================= */
     const shopModal = document.getElementById('shop-modal');
     document.getElementById('shop-btn').onclick = () => {
@@ -1710,6 +1882,9 @@
 
       filteredSkins.forEach(skin => {
         const item = document.createElement('div');
+        const isTrialActive = skin.purchaseType === 'trial' && skin.trialExpires && skin.trialExpires > Date.now();
+        const isOwnedOrUnlocked = skin.unlocked || isTrialActive;
+
         item.className = `p-2.5 rounded-2xl border flex flex-col items-center justify-between bg-slate-800/80 ${
           activeSkin.id === skin.id ? 'border-cyan-400 glow-cyan' : 'border-slate-700'
         }`;
@@ -1736,25 +1911,55 @@
         else if (skin.type === 'deer') iconEmoji = '🦌';
         else if (skin.type === 'bull') iconEmoji = '🐂';
 
+        let buttonHTML = '';
+        if (activeSkin.id === skin.id) {
+          buttonHTML = `<button class="w-full py-1 text-[10px] font-bold rounded-xl bg-cyan-500 text-slate-950 cursor-default">Equipped</button>`;
+        } else if (isOwnedOrUnlocked) {
+          buttonHTML = `<button class="w-full py-1 text-[10px] font-bold rounded-xl bg-slate-700 hover:bg-slate-600 text-white transition">Equip</button>`;
+        } else if (skin.purchaseType === 'carrot') {
+          buttonHTML = `<button class="w-full py-1 text-[10px] font-bold rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 transition">Buy 🥕${skin.cost}</button>`;
+        } else {
+          buttonHTML = `<button class="w-full py-1 text-[10px] font-bold rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 hover:from-fuchsia-400 hover:to-purple-500 text-white transition">📺 3-Day Trial</button>`;
+        }
+
         item.innerHTML = `
           <div class="w-8 h-8 rounded-full mb-1 flex items-center justify-center font-bold shadow" style="background:${skin.color}">${iconEmoji}</div>
           <p class="text-[11px] font-bold text-slate-200 text-center leading-tight mb-1">${skin.name}</p>
-          <button class="w-full py-1 text-[10px] font-bold rounded-xl transition ${
-            activeSkin.id === skin.id 
-              ? 'bg-cyan-500 text-slate-950 cursor-default'
-              : 'bg-slate-700 hover:bg-slate-600 text-white'
-          }">
-            ${activeSkin.id === skin.id ? 'Equipped' : 'Equip (Free)'}
-          </button>
+          ${isTrialActive ? `<p class="text-[9px] text-fuchsia-400 font-bold mb-1">Trial Active!</p>` : ''}
+          ${buttonHTML}
         `;
 
         const btn = item.querySelector('button');
         if (activeSkin.id !== skin.id) {
-          btn.onclick = () => {
-            activeSkin = skin;
-            playSound('powerup');
-            renderSkinsGrid();
-          };
+          if (isOwnedOrUnlocked) {
+            btn.onclick = () => {
+              activeSkin = skin;
+              playSound('powerup');
+              renderSkinsGrid();
+            };
+          } else if (skin.purchaseType === 'carrot') {
+            btn.onclick = () => {
+              if (gems >= skin.cost) {
+                gems -= skin.cost;
+                skin.unlocked = true;
+                activeSkin = skin;
+                playSound('powerup');
+                updateHUD();
+                renderSkinsGrid();
+              } else {
+                setTipText('🥕 Not enough carrots to buy this skin!');
+              }
+            };
+          } else if (skin.purchaseType === 'trial') {
+            btn.onclick = () => {
+              showAdModal(`Watch ad to unlock 3-day trial for ${skin.name}?`, () => {
+                skin.trialExpires = Date.now() + (3 * 24 * 60 * 60 * 1000); // 3 days
+                activeSkin = skin;
+                playSound('powerup');
+                renderSkinsGrid();
+              });
+            };
+          }
         }
         grid.appendChild(item);
       });
@@ -1768,7 +1973,7 @@
       if (level > highScore) {
         highScore = level;
         localStorage.setItem('neon_bunny_highscore_ultimate', highScore.toString());
-        document.getElementById('high-score-display').innerText = highScore;
+        updateMenuUI();
       }
 
       if (isWin) {
@@ -1787,9 +1992,14 @@
             <div class="flex justify-between"><span>Carrots Bonus:</span><span class="font-bold text-amber-400">+${rewardGems} 🥕</span></div>
             <div class="flex justify-between"><span>Total Turns Used:</span><span class="font-bold text-cyan-300">${turnCount} / ${maxTurnLimit}</span></div>
           </div>
-          <button id="next-level-btn" class="w-full py-2.5 bg-gradient-to-r from-cyan-400 to-emerald-400 hover:from-cyan-300 hover:to-emerald-300 text-slate-950 font-fredoka uppercase text-sm rounded-xl shadow-lg glow-cyan transition">
-            Next Level 🚀
-          </button>
+          <div class="space-y-2">
+            <button id="next-level-btn" class="w-full py-2.5 bg-gradient-to-r from-cyan-400 to-emerald-400 hover:from-cyan-300 hover:to-emerald-300 text-slate-950 font-fredoka uppercase text-sm rounded-xl shadow-lg glow-cyan transition">
+              Next Level 🚀
+            </button>
+            <button id="modal-menu-btn" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-purple-300 font-bold text-xs rounded-xl border border-purple-500/30 transition">
+              🏠 Main Menu
+            </button>
+          </div>
         `;
         gems += rewardGems;
         updateHUD();
@@ -1799,29 +2009,61 @@
           level++;
           initLevel();
         };
+        document.getElementById('modal-menu-btn').onclick = () => {
+          modal.classList.add('hidden');
+          showStartMenu();
+        };
       } else {
+        const canContinueWithAd = continueAdCount < 3;
         content.innerHTML = `
           <div class="text-5xl mb-2">💔</div>
           <h2 class="font-fredoka text-2xl text-rose-400 mb-1">GAME OVER</h2>
           <p class="text-xs text-slate-300 mb-4">${message}</p>
-          <button id="retry-btn" class="w-full py-2.5 bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-400 hover:to-amber-400 text-white font-fredoka uppercase text-sm rounded-xl shadow-lg transition">
-            Try Again 🔄
-          </button>
+          <div class="space-y-2">
+            ${canContinueWithAd ? `
+              <button id="continue-ad-btn" class="w-full py-2.5 bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 text-slate-950 font-fredoka uppercase text-sm rounded-xl shadow-lg transition">
+                📺 Continue with Ad (${3 - continueAdCount}/3 left)
+              </button>
+            ` : ''}
+            <button id="retry-btn" class="w-full py-2.5 bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-400 hover:to-amber-400 text-white font-fredoka uppercase text-sm rounded-xl shadow-lg transition">
+              Try Again 🔄
+            </button>
+            <button id="modal-menu-btn-loss" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-purple-300 font-bold text-xs rounded-xl border border-purple-500/30 transition">
+              🏠 Main Menu
+            </button>
+          </div>
         `;
+        
+        if (canContinueWithAd) {
+          document.getElementById('continue-ad-btn').onclick = () => {
+            showAdModal("Watch ad to continue your game with full health?", () => {
+              continueAdCount++;
+              hp = maxHp;
+              updateHUD();
+              modal.classList.add('hidden');
+            });
+          };
+        }
+
         document.getElementById('retry-btn').onclick = () => {
           modal.classList.add('hidden');
           hp = maxHp;
+          continueAdCount = 0;
           initLevel();
+        };
+        document.getElementById('modal-menu-btn-loss').onclick = () => {
+          modal.classList.add('hidden');
+          showStartMenu();
         };
       }
     }
 
     /* =========================================================================
-       7. CANVAS GRAPHICS & RENDERING
+       9. CANVAS GRAPHICS & RENDERING
        ========================================================================= */
     function resizeCanvas() {
       const container = CANVAS.parentElement;
-      const size = Math.min(container.clientWidth, container.clientHeight, 540);
+      const size = Math.min(container.clientWidth, container.clientHeight, 580);
       CANVAS.width = size; CANVAS.height = size;
       TILE_SIZE = size / GRID_SIZE;
     }
@@ -2442,7 +2684,7 @@
     }
 
     /* =========================================================================
-       8. PARTICLE EFFECTS
+       10. PARTICLE EFFECTS
        ========================================================================= */
     function addParticles(gx, gy, count, color) {
       const cx = gx * TILE_SIZE + TILE_SIZE / 2;
@@ -2477,10 +2719,11 @@
     }
 
     /* =========================================================================
-       9. BOOTSTRAP
+       11. BOOTSTRAP
        ========================================================================= */
     window.onload = () => {
       initLevel();
+      showStartMenu();
       requestAnimationFrame(draw);
     };
   </script>
