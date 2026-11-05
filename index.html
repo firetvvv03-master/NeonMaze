@@ -246,8 +246,8 @@
       </div>
     </main>
 
-    <!-- Bottom Power-Up / Leap Deck Bar (With Planned Cards Sequence placed right under powerups and above description bar) -->
-    <aside class="w-full bg-slate-900/90 backdrop-blur-md border border-amber-500/40 rounded-2xl p-1.5 flex flex-col shadow-xl shrink-0">
+    <!-- Bottom Power-Up / Leap Deck Bar (With Expanded Planned Cards Sequence Bar) -->
+    <aside class="w-full bg-slate-900/90 backdrop-blur-md border border-amber-500/40 rounded-2xl p-2 flex flex-col shadow-xl shrink-0">
       <div class="flex items-center justify-between pb-0.5 mb-1 border-b border-amber-500/30 px-1">
         <h2 class="font-fredoka text-[11px] sm:text-xs text-amber-400 tracking-wide flex items-center space-x-1.5">
           <span>⚡</span>
@@ -255,14 +255,14 @@
         </h2>
         <span class="text-[9px] text-slate-400">Click or hover for info</span>
       </div>
-      <div id="powerup-deck-container" class="flex flex-row overflow-x-auto space-x-1.5 pb-1 pr-1 mb-1 min-h-[46px] items-center">
+      <div id="powerup-deck-container" class="flex flex-row overflow-x-auto space-x-1.5 pb-1 pr-1 mb-1.5 min-h-[46px] items-center">
         <!-- Rendered via JS -->
       </div>
       
-      <!-- PLANNED CARDS QUEUE (Moved here as requested, above description box and under power-ups & leaps) -->
-      <div class="w-full bg-slate-900/90 backdrop-blur-md px-2 py-1 rounded-xl border border-cyan-500/30 flex items-center justify-between min-h-[38px] shadow-lg mb-1">
-        <div class="flex items-center space-x-1.5 overflow-x-auto py-0.5 px-1 flex-1" id="queue-container">
-          <span id="queue-empty-text" class="text-xs text-slate-500 italic pl-1">Planned cards appear here...</span>
+      <!-- PLANNED CARDS QUEUE (Expanded height and width capacity with smooth scrolling) -->
+      <div class="w-full min-w-0 bg-slate-950/90 backdrop-blur-md px-2.5 py-1.5 rounded-xl border-2 border-cyan-400/50 flex items-center shadow-inner mb-1.5 overflow-hidden glow-cyan">
+        <div class="flex items-center gap-1.5 overflow-x-auto overflow-y-hidden py-1 px-1 w-full min-w-0 scrollbar-thin touch-pan-x" id="queue-container">
+          <span id="queue-empty-text" class="text-xs text-cyan-300/60 italic pl-1 whitespace-nowrap">Planned cards appear here (scrollable)...</span>
         </div>
       </div>
 
@@ -1103,8 +1103,8 @@
       if (plannedQueue.length === 0) {
         const emptyText = document.createElement('span');
         emptyText.id = 'queue-empty-text';
-        emptyText.className = 'text-xs text-slate-500 italic pl-1';
-        emptyText.innerText = 'Planned cards appear here...';
+        emptyText.className = 'text-xs text-cyan-300/60 italic pl-1 whitespace-nowrap';
+        emptyText.innerText = 'Planned cards appear here (scrollable)...';
         queueContainer.appendChild(emptyText);
 
         executeBtn.disabled = true;
@@ -1121,16 +1121,16 @@
         const item = document.createElement('div');
         const isPower = card.type === 'power';
         const isJump = card.type === 'jump';
-        item.className = `flex items-center space-x-1 px-2 py-1 rounded-lg border text-xs shrink-0 ${
+        item.className = `flex items-center space-x-1 px-2.5 py-1 rounded-lg border text-xs shrink-0 whitespace-nowrap shadow ${
           isPower 
-            ? 'bg-amber-950/60 border-amber-500/50 text-amber-300' 
+            ? 'bg-amber-950/70 border-amber-500/60 text-amber-300' 
             : isJump 
-              ? 'bg-cyan-950/60 border-cyan-500/50 text-cyan-200' 
-              : 'bg-slate-800 border-cyan-500/30 text-cyan-300'
+              ? 'bg-cyan-950/70 border-cyan-500/60 text-cyan-200' 
+              : 'bg-slate-800 border-cyan-500/40 text-cyan-300'
         }`;
         item.innerHTML = `
           <span class="text-xs sm:text-sm">${card.icon}</span>
-          <span class="font-bold">${card.label}</span>
+          <span class="font-bold text-[10px] sm:text-xs">${card.label}</span>
         `;
         queueContainer.appendChild(item);
       });
