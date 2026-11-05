@@ -21,6 +21,10 @@
       overscroll-behavior: none;
       touch-action: none;
     }
+    /* Explicitly allow horizontal touch scrolling on scroll containers */
+    #queue-container, #powerup-deck-container, .overflow-x-auto, .overflow-y-auto {
+      touch-action: pan-x pan-y !important;
+    }
     .font-fredoka {
       font-family: 'Fredoka One', cursive;
     }
@@ -110,12 +114,9 @@
   <!-- START MENU OVERLAY -->
   <div id="start-menu-overlay" class="fixed inset-0 bg-slate-950/95 backdrop-blur-xl z-40 flex items-center justify-center p-4">
     <div class="max-w-md w-full bg-slate-900/90 border-2 border-cyan-500/40 rounded-3xl p-6 sm:p-8 flex flex-col items-center text-center shadow-2xl relative overflow-hidden glow-cyan">
-      
-      <!-- Decorative Neon Background Orbs inside modal -->
       <div class="absolute -top-20 -right-20 w-48 h-48 bg-cyan-500/20 rounded-full blur-2xl pointer-events-none"></div>
       <div class="absolute -bottom-20 -left-20 w-48 h-48 bg-fuchsia-500/20 rounded-full blur-2xl pointer-events-none"></div>
 
-      <!-- Icon & Title -->
       <div class="text-6xl mb-3 pulse-glow">🐰⚡</div>
       <h1 class="font-fredoka text-2xl sm:text-3xl text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-fuchsia-400 text-glow-cyan tracking-wide mb-1">
         NEON BUNNY
@@ -124,9 +125,7 @@
         ULTIMATE DELUXE RUNNER
       </p>
 
-      <!-- Main Action Buttons -->
       <div class="w-full space-y-3.5 mb-6 z-10">
-        <!-- Campaign Mode Button -->
         <button id="menu-campaign-btn" class="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-cyan-500 to-sky-400 hover:from-cyan-400 hover:to-sky-300 text-slate-950 font-fredoka text-base sm:text-lg uppercase tracking-wider shadow-lg glow-cyan transition transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-between group">
           <span class="flex items-center space-x-2">
             <span class="text-xl">🎮</span>
@@ -135,7 +134,6 @@
           <span class="text-xs bg-slate-950/20 px-2.5 py-1 rounded-lg text-slate-900 font-bold group-hover:bg-slate-950/30">Levels & Bosses</span>
         </button>
 
-        <!-- Endless Mode Button -->
         <button id="menu-endless-btn" class="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-fuchsia-500 to-purple-600 hover:from-fuchsia-400 hover:to-purple-500 text-white font-fredoka text-base sm:text-lg uppercase tracking-wider shadow-lg glow-purple transition transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-between group">
           <span class="flex items-center space-x-2">
             <span class="text-xl">♾️</span>
@@ -144,7 +142,6 @@
           <span class="text-xs bg-slate-950/30 px-2.5 py-1 rounded-lg text-fuchsia-200 font-bold group-hover:bg-slate-950/40">High Score Rush</span>
         </button>
 
-        <!-- Shop & Skins Button -->
         <button id="menu-shop-btn" class="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-fredoka text-base sm:text-lg uppercase tracking-wider shadow-lg glow-amber transition transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-between group">
           <span class="flex items-center space-x-2">
             <span class="text-xl">🛒</span>
@@ -154,7 +151,6 @@
         </button>
       </div>
 
-      <!-- Footer Info Row (High Score & Sound Toggle) -->
       <div class="w-full pt-4 border-t border-slate-800 flex items-center justify-between text-xs z-10">
         <div class="flex items-center space-x-1.5 text-slate-400 font-bold">
           <span>🏆 Best Level:</span>
@@ -165,14 +161,12 @@
           <span id="menu-sound-text">Sound ON</span>
         </button>
       </div>
-
     </div>
   </div>
 
   <!-- Top Header / HUD -->
   <header class="w-full max-w-4xl flex flex-col gap-1 z-10 bg-slate-900/90 backdrop-blur-md px-3 sm:px-5 py-1.5 rounded-2xl border border-slate-800 shadow-2xl shrink-0 mt-0">
     <div class="flex items-center justify-between">
-      <!-- Stats Left -->
       <div class="flex items-center space-x-2 sm:space-x-4">
         <div class="flex items-center space-x-1" title="Health Points">
           <span class="text-lg sm:text-xl">❤️</span>
@@ -186,20 +180,17 @@
           <span class="text-slate-400 text-[10px] sm:text-xs uppercase tracking-wider font-bold">Lvl</span>
           <span id="level-display" class="font-fredoka text-base sm:text-lg text-cyan-400">1</span>
         </div>
-        <!-- Shield Indicator -->
         <div id="shield-indicator" class="hidden items-center space-x-1 bg-cyan-950 border border-cyan-500/50 px-2 py-0.5 rounded-lg">
           <span class="text-xs">🛡️</span>
           <span class="text-[10px] text-cyan-300 font-bold uppercase">Active</span>
         </div>
       </div>
 
-      <!-- Actions Right -->
       <div class="flex items-center space-x-1.5 sm:space-x-2">
         <div class="flex items-center space-x-1 bg-slate-800/80 px-2 py-1 rounded-xl border border-slate-700" title="Turn Limit">
           <span class="text-[10px] text-slate-400 font-bold uppercase">Turn</span>
           <span id="turn-display" class="font-fredoka text-cyan-300 text-sm sm:text-base">1/13</span>
         </div>
-        <!-- Main Menu Return Button -->
         <button id="main-menu-btn" class="px-2 py-1.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/40 text-xs font-bold transition flex items-center space-x-1" title="Return to Main Menu">
           <span>🏠</span>
           <span class="hidden lg:inline">Menu</span>
@@ -217,7 +208,6 @@
       </div>
     </div>
 
-    <!-- BOSS HEALTH BAR OVERLAY (Hidden by default) -->
     <div id="boss-hud" class="hidden w-full flex-col bg-rose-950/60 border border-rose-500/50 rounded-xl p-2 mt-1">
       <div class="flex justify-between items-center mb-1 px-1">
         <span id="boss-name-text" class="font-fredoka text-xs sm:text-sm text-rose-300 flex items-center space-x-1.5 text-glow-rose">
@@ -234,19 +224,14 @@
 
   <!-- Central Play Area: Full-width Maze Canvas & Powerups -->
   <div id="game-layout" class="w-full max-w-4xl flex flex-col items-center justify-center gap-0.5 my-0 flex-1 min-h-0">
-    
-    <!-- Game Canvas Container -->
     <main id="canvas-wrapper" class="relative w-full flex items-center justify-center min-w-0 flex-1 min-h-0">
       <canvas id="gameCanvas" class="rounded-2xl border-2 border-cyan-500/30 shadow-2xl bg-slate-900/90 max-w-full max-h-full object-contain cursor-pointer"></canvas>
-      
-      <!-- Status Overlay Banner -->
       <div id="instruction-tip" class="absolute top-2 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur-md px-3 py-1 rounded-full border border-cyan-500/40 text-[11px] font-semibold text-cyan-200 shadow-lg pointer-events-none transition-all duration-300 flex items-center space-x-1.5">
         <span id="tip-icon">💡</span>
         <span id="tip-text">Select cards to queue moves, then press RUN!</span>
       </div>
     </main>
 
-    <!-- Bottom Power-Up / Leap Deck Bar (With Expanded Planned Cards Sequence Bar) -->
     <aside class="w-full bg-slate-900/90 backdrop-blur-md border border-amber-500/40 rounded-2xl p-2 flex flex-col shadow-xl shrink-0">
       <div class="flex items-center justify-between pb-0.5 mb-1 border-b border-amber-500/30 px-1">
         <h2 class="font-fredoka text-[11px] sm:text-xs text-amber-400 tracking-wide flex items-center space-x-1.5">
@@ -259,24 +244,21 @@
         <!-- Rendered via JS -->
       </div>
       
-      <!-- PLANNED CARDS QUEUE (Expanded height and width capacity with smooth scrolling) -->
+      <!-- PLANNED CARDS QUEUE -->
       <div class="w-full min-w-0 bg-slate-950/90 backdrop-blur-md px-2.5 py-1.5 rounded-xl border-2 border-cyan-400/50 flex items-center shadow-inner mb-1.5 overflow-hidden glow-cyan">
-        <div class="flex items-center gap-1.5 overflow-x-auto overflow-y-hidden py-1 px-1 w-full min-w-0 scrollbar-thin touch-pan-x" id="queue-container">
+        <div class="flex items-center gap-1.5 overflow-x-auto overflow-y-hidden py-1 px-1 w-full min-w-0 scrollbar-thin" id="queue-container">
           <span id="queue-empty-text" class="text-xs text-cyan-300/60 italic pl-1 whitespace-nowrap">Planned cards appear here (scrollable)...</span>
         </div>
       </div>
 
-      <!-- Blue Description Box at Bottom of Panel -->
       <div id="powerup-desc-box" class="bg-blue-950/80 border border-blue-500/60 rounded-xl p-1 text-[10px] text-blue-200 font-medium leading-snug shadow-inner flex items-center justify-center text-center">
         Hover or select a power-up card to view its description here.
       </div>
     </aside>
   </div>
 
-  <!-- Bottom Control Deck (Control Buttons & Movement Hand Deck) -->
+  <!-- Bottom Control Deck -->
   <footer class="w-full max-w-4xl z-10 flex flex-col gap-1 shrink-0 pb-1 mt-0">
-    
-    <!-- Control Buttons Row (Clear, Undo, Reroll, RUN!) -->
     <div class="w-full bg-slate-900/90 backdrop-blur-md px-3 py-1 rounded-xl border border-slate-800 flex items-center justify-end min-h-[38px] shadow-lg">
       <div class="flex items-center space-x-1.5 shrink-0">
         <button id="undo-btn" class="px-2 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold text-xs rounded-xl transition border border-amber-500/30 disabled:opacity-30 disabled:pointer-events-none" title="Undo last step">
@@ -295,7 +277,6 @@
       </div>
     </div>
 
-    <!-- MOVEMENT HAND DECK ROW -->
     <div class="flex flex-col gap-0.5 w-full">
       <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider px-1 flex justify-between">
         <span>Movement Hand</span>
@@ -350,7 +331,6 @@
           </div>
         </div>
 
-        <!-- Skin Categories Selector & Grid -->
         <div>
           <div class="flex items-center justify-between mb-2">
             <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Animal Skins (60 Styles)</h3>
@@ -379,9 +359,6 @@
 
   <!-- Game Logic Script -->
   <script>
-    /* =========================================================================
-       1. GAME CONSTANTS, CONFIG & STATE
-       ========================================================================= */
     const CANVAS = document.getElementById('gameCanvas');
     const CTR = CANVAS.getContext('2d');
 
@@ -402,8 +379,8 @@
     let keyCollected = false;
     let isExecuting = false;
     let soundEnabled = true;
-    let gameMode = 'campaign'; // 'campaign' or 'endless'
-    let continueAdCount = 0; // Max 3 times per run
+    let gameMode = 'campaign';
+    let continueAdCount = 0;
 
     let isBossLevel = false;
     let boss = null; 
@@ -411,7 +388,6 @@
     let highScore = parseInt(localStorage.getItem('neon_bunny_highscore_ultimate') || '1');
 
     const SKINS = [
-      // --- BUNNIES (20 Styles) ---
       { id: 'cyan', name: 'Neon Cyan Bunny', category: 'bunny', type: 'bunny', color: '#00e5ff', earInner: '#a5f3fc', blush: '#38bdf8', purchaseType: 'carrot', cost: 50, unlocked: true },
       { id: 'pink', name: 'Cyber Pink Bunny', category: 'bunny', type: 'bunny', color: '#ec4899', earInner: '#fbcfe8', blush: '#f43f5e', purchaseType: 'carrot', cost: 75, unlocked: false },
       { id: 'gold', name: 'Golden Bunny', category: 'bunny', type: 'bunny', color: '#f59e0b', earInner: '#fef08a', blush: '#fbbf24', purchaseType: 'carrot', cost: 100, unlocked: false },
@@ -433,7 +409,6 @@
       { id: 'tangerine', name: 'Tangerine Glow', category: 'bunny', type: 'bunny', color: '#ea580c', earInner: '#ffedd5', blush: '#c2410c', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
       { id: 'obsidian', name: 'Midnight Obsidian', category: 'bunny', type: 'bunny', color: '#1e293b', earInner: '#475569', blush: '#0f172a', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
 
-      // --- CAT & FRIENDS (20 Styles) ---
       { id: 'cat_kitty', name: 'Neon Kitty', category: 'cat_friends', type: 'cat', color: '#fb7185', earInner: '#fbcfe8', blush: '#f43f5e', purchaseType: 'carrot', cost: 50, unlocked: false },
       { id: 'dog_puppy', name: 'Sparkle Puppy', category: 'cat_friends', type: 'dog', color: '#a16207', earInner: '#fef08a', blush: '#ca8a04', purchaseType: 'carrot', cost: 75, unlocked: false },
       { id: 'hamster_cheek', name: 'Chubby Hamster', category: 'cat_friends', type: 'hamster', color: '#fb923c', earInner: '#ffedd5', blush: '#f97316', purchaseType: 'carrot', cost: 100, unlocked: false },
@@ -455,7 +430,6 @@
       { id: 'axolotl', name: 'Neon Axolotl', category: 'cat_friends', type: 'mouse', color: '#f472b6', earInner: '#fbcfe8', blush: '#ec4899', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
       { id: 'bat', name: 'Shadow Bat', category: 'cat_friends', type: 'owl', color: '#312e81', earInner: '#4338ca', blush: '#1e1b4b', purchaseType: 'trial', unlocked: false, trialExpires: 0 },
 
-      // --- WILD & FOREST (20 Styles) ---
       { id: 'bear_teddy', name: 'Honey Bear', category: 'wild', type: 'bear', color: '#d97706', earInner: '#fde68a', blush: '#b45309', purchaseType: 'carrot', cost: 50, unlocked: false },
       { id: 'panda_bamboo', name: 'Cyber Panda', category: 'wild', type: 'panda', color: '#334155', earInner: '#cbd5e1', blush: '#64748b', purchaseType: 'carrot', cost: 75, unlocked: false },
       { id: 'koala_eucaly', name: 'Dreamy Koala', category: 'wild', type: 'koala', color: '#64748b', earInner: '#cbd5e1', blush: '#475569', purchaseType: 'carrot', cost: 100, unlocked: false },
@@ -554,12 +528,18 @@
 
     let particles = [];
 
-    // Prevent default gesture panning/zooming/scrolling on mobile touch hold
-    document.addEventListener('touchmove', (e) => { e.preventDefault(); }, { passive: false });
+    // Selective touch event handling (permits touch scrolling inside designated containers)
+    document.addEventListener('touchmove', (e) => {
+      if (e.target.closest('#queue-container, #powerup-deck-container, .overflow-x-auto, .overflow-y-auto')) {
+        return;
+      }
+      e.preventDefault();
+    }, { passive: false });
+    
     document.addEventListener('gesturestart', (e) => { e.preventDefault(); });
 
     /* =========================================================================
-       2. SYNTHESIZED SOUND SYSTEM (Web Audio API)
+       2. SYNTHESIZED SOUND SYSTEM
        ========================================================================= */
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     let audioCtx = null;
@@ -1134,6 +1114,9 @@
         `;
         queueContainer.appendChild(item);
       });
+
+      // Auto scroll to the latest card added
+      queueContainer.scrollLeft = queueContainer.scrollWidth;
     }
 
     function selectCard(card) {
@@ -1956,7 +1939,7 @@
           } else if (skin.purchaseType === 'trial') {
             btn.onclick = () => {
               showAdModal(`Watch ad to unlock 3-day trial for ${skin.name}?`, () => {
-                skin.trialExpires = Date.now() + (3 * 24 * 60 * 60 * 1000); // 3 days
+                skin.trialExpires = Date.now() + (3 * 24 * 60 * 60 * 1000);
                 activeSkin = skin;
                 playSound('powerup');
                 renderSkinsGrid();
